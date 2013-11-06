@@ -7,6 +7,8 @@ class FMap : public QMainWindow
 {
 public:
     FMap(QWidget* parent = 0);
+    void    addCable();
+
 };
 
 #endif // FMAP_H

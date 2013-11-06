@@ -24,4 +24,17 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
 //    widget->setLayout(layout);
 //    setCentralWidget(widget);
 //    widget->show();
+
+    QAction * cableAdd = new QAction("AddCable");
+    QMenu *add = menuBar()->addMenu("Add");
+    add->addAction(cableAdd);
+        // Menus
+//    addAction(cableAdd);
+    // Actions
+
+}
+
+FMap::addCable()
+{
+    setCursor(Qt::CrossCursor);
 }
