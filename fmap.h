@@ -5,8 +5,12 @@
 
 class FMap : public QMainWindow
 {
+    Q_OBJECT
+
 public:
     FMap(QWidget* parent = 0);
+
+public slots:
     void    addCable();
 
 };

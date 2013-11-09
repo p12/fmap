@@ -15,7 +15,6 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     view->setMinimumSize(700, 700);
     view->show();
 
-    setCentralWidget(view);
 
 //    QHBoxLayout *layout = new QHBoxLayout;
 //    layout->addWidget(&view);
@@ -25,16 +24,16 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
 //    setCentralWidget(widget);
 //    widget->show();
 
-    QAction * cableAdd = new QAction("AddCable");
-    QMenu *add = menuBar()->addMenu("Add");
+    QAction * cableAdd = new QAction("AddCable", this);
+    QMenu *add = menuBar()->addMenu(tr("&Add"));
     add->addAction(cableAdd);
-        // Menus
-//    addAction(cableAdd);
-    // Actions
+    connect(cableAdd, SIGNAL(triggered()), this, SLOT(addCable()));
+
+    setCentralWidget(view);
 
 }
 
-FMap::addCable()
+void FMap::addCable()
 {
     setCursor(Qt::CrossCursor);
 }
