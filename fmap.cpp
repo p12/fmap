@@ -33,15 +33,18 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
 void FMap::setPoint(QPoint p)
 {
     if (a.isNull())
-        a = p;
+        a = mapFromParent(p);
+
     else {
-        QLineF l(a, p);
+        QLineF l(a, mapFromParent(p));
         scene->addLine(l);
+
+        // Clear data
         a = QPoint(0, 0);
+        disconnect(getPoint, SIGNAL(hasPoint(QPoint)), 0, 0);
         removeEventFilter(getPoint);
         setCursor(Qt::ArrowCursor);
     }
-
 }
 
 void FMap::addCable()

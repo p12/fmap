@@ -14,8 +14,6 @@ signals:
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
-public:
-    QPoint a;
 };
 
 #endif // LINEPOINTS_H
