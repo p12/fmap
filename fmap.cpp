@@ -6,14 +6,12 @@
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
-    scene = new QGraphicsScene;
+    scene = new QGraphicsScene(this);
     scene->addText("Hello, world!");
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
     scene->addItem(map);
 
-    QGraphicsView *view = new QGraphicsView(scene);
-
-    view->setMinimumSize(700, 700);
+    view = new QGraphicsView(scene, this);
     view->show();
 
     // Create actions
@@ -25,18 +23,16 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     add->addAction(cableAdd);
 
     setCentralWidget(view);
-
-
-    getPoint = new LinePoints;
+    getPoint = new GetPoint;
 }
 
 void FMap::setPoint(QPoint p)
 {
     if (a.isNull())
-        a = mapFromParent(p);
+        a = mapTo(view, p);
 
     else {
-        QLineF l(a, mapFromParent(p));
+        QLine l(a, p);
         scene->addLine(l);
 
         // Clear data

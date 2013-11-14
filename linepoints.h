@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QPoint>
 
-class LinePoints : public QObject
+class GetPoint : public QObject
 {
     Q_OBJECT
     
@@ -13,7 +13,6 @@ signals:
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
-
 };
 
 #endif // LINEPOINTS_H

@@ -1,11 +1,13 @@
 #include <QtGui>
 #include "linepoints.h"
 
-bool LinePoints::eventFilter(QObject *obj, QEvent *event)
+
+bool GetPoint::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonPress) {
         QMouseEvent *keyEvent = static_cast<QMouseEvent *>(event);
-        hasPoint(keyEvent->pos());
+        QPoint p = keyEvent->pos();
+        hasPoint(p);
 
         return true;
     } else {

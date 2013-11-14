@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 class QGraphicsScene;
-class LinePoints;
+class QGraphicsView;
+class GetPoint;
 
 class FMap : public QMainWindow
 {
@@ -18,7 +19,8 @@ public slots:
 
 private:
     QGraphicsScene *scene;
-    LinePoints *getPoint;
+    QGraphicsView *view;
+    GetPoint *getPoint;
     QPoint a;
 };
 
