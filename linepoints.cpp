@@ -7,7 +7,7 @@ bool GetPoint::eventFilter(QObject *obj, QEvent *event)
     if (event->type() == QEvent::MouseButtonPress) {
         QMouseEvent *keyEvent = static_cast<QMouseEvent *>(event);
         QPoint p = keyEvent->pos();
-        hasPoint(p);
+        hasPoint();
 
         return true;
     } else {

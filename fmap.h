@@ -15,13 +15,17 @@ public:
 
 public slots:
     void addCable();
-    void setPoint(QPoint p);
+    void setPoint();
 
 private:
     QGraphicsScene *scene;
     QGraphicsView *view;
     GetPoint *getPoint;
     QPoint a;
+    bool inAddCable;
+
+protected:
+    void mousePressEvent(QMouseEvent *);
 };
 
 #endif // FMAP_H

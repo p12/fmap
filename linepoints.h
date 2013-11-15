@@ -9,7 +9,7 @@ class GetPoint : public QObject
     Q_OBJECT
     
 signals:
-    void hasPoint(QPoint p);
+    void hasPoint();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);

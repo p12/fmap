@@ -26,19 +26,21 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     getPoint = new GetPoint;
 }
 
-void FMap::setPoint(QPoint p)
-{
+void FMap::setPoint()
+{    
+    QPoint p;
     if (a.isNull())
-        a = mapTo(view, p);
+        a = p;
 
     else {
         QLine l(a, p);
+
         scene->addLine(l);
 
         // Clear data
         a = QPoint(0, 0);
-        disconnect(getPoint, SIGNAL(hasPoint(QPoint)), 0, 0);
-        removeEventFilter(getPoint);
+//        disconnect(getPoint, SIGNAL(hasPoint()), 0, 0);
+//        removeEventFilter(getPoint);
         setCursor(Qt::ArrowCursor);
     }
 }
@@ -46,6 +48,11 @@ void FMap::setPoint(QPoint p)
 void FMap::addCable()
 {
     setCursor(Qt::CrossCursor);
-    connect(getPoint, SIGNAL(hasPoint(QPoint)), SLOT(setPoint(QPoint)));
-    installEventFilter(getPoint);
+//    connect(getPoint, SIGNAL(hasPoint()), SLOT(setPoint()));
+//    installEventFilter(getPoint);
+}
+
+void FMap::mousePressEvent(QMouseEvent *e)
+{
+    if ()
 }
