@@ -1,17 +1,16 @@
 #include <QtGui>
 #include <QtSvg>
 #include "fmap.h"
-#include "linepoints.h"
 
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
-    scene = new QGraphicsScene(this);
-    scene->addText("Hello, world!");
+    scene = new QGraphicsScene;
+//    scene->addText("Hello, world!");
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
     scene->addItem(map);
 
-    view = new QGraphicsView(scene, this);
+    view = new QGraphicsView(scene);
     view->show();
 
     // Create actions
@@ -23,36 +22,50 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     add->addAction(cableAdd);
 
     setCentralWidget(view);
-    getPoint = new GetPoint;
-}
 
-void FMap::setPoint()
-{    
-    QPoint p;
-    if (a.isNull())
-        a = p;
-
-    else {
-        QLine l(a, p);
-
-        scene->addLine(l);
-
-        // Clear data
-        a = QPoint(0, 0);
-//        disconnect(getPoint, SIGNAL(hasPoint()), 0, 0);
-//        removeEventFilter(getPoint);
-        setCursor(Qt::ArrowCursor);
-    }
+    // Dock view for box diagram
+    dockScene = new QGraphicsScene;
+    dockScene->addText("Dock widget");
+    dockView = new QGraphicsView(dockScene);
+    dockView->setMinimumWidth(250);
+    dockView->show();
+    QDockWidget *dockWidget = new QDockWidget;
+    dockWidget->setWidget(dockView);
+    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 }
 
 void FMap::addCable()
 {
     setCursor(Qt::CrossCursor);
-//    connect(getPoint, SIGNAL(hasPoint()), SLOT(setPoint()));
-//    installEventFilter(getPoint);
+    inAddCable = true;
+}
+
+void FMap::drawBox()
+{
+
 }
 
 void FMap::mousePressEvent(QMouseEvent *e)
 {
-    if ()
+    if (inAddCable)
+    {
+        QPoint p = mapTo(this, e->globalPos());
+        if (a.isNull())
+            a = p;
+        else {
+            QLine l(a, p);
+            scene->addLine(l);
+            scene->addEllipse(QRectF(a.x(), a.y(), 10, 10));
+
+            QGraphicsEllipseItem *ell = new QGraphicsEllipseItem(p.x(), p.y(), 10, 10);
+            ell->setFlags(QGraphicsItem::ItemIsSelectable);
+            connect(ell, SIGNAL(isSelected()), this, SLOT(drawBox()));
+            scene->addItem(ell);
+
+            // Clear data
+            a = QPoint(0, 0);
+            inAddCable = false;
+            setCursor(Qt::ArrowCursor);
+        }
+    }
 }

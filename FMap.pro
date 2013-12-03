@@ -13,8 +13,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-           fmap.cpp \
-    linepoints.cpp
+           fmap.cpp
 
-HEADERS  += fmap.h \
-    linepoints.h
+HEADERS  += fmap.h

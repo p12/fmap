@@ -4,7 +4,6 @@
 #include <QMainWindow>
 class QGraphicsScene;
 class QGraphicsView;
-class GetPoint;
 
 class FMap : public QMainWindow
 {
@@ -15,12 +14,13 @@ public:
 
 public slots:
     void addCable();
-    void setPoint();
+    void drawBox();
 
 private:
-    QGraphicsScene *scene;
-    QGraphicsView *view;
-    GetPoint *getPoint;
+    QGraphicsScene *scene,
+                   *dockScene;
+    QGraphicsView *view,
+                  *dockView;
     QPoint a;
     bool inAddCable;
 
