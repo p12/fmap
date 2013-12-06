@@ -21,7 +21,7 @@ private:
                    *dockScene;
     QGraphicsView *view,
                   *dockView;
-    QPoint a;
+    QPointF a;
     bool inAddCable;
 
 protected:

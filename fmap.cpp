@@ -24,15 +24,6 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
 
     setCentralWidget(view);
 
-    // Dock view for box diagram
-//    dockScene = new QGraphicsScene;
-//    dockScene->addText("Dock widget");
-//    dockView = new QGraphicsView(dockScene);
-//    dockView->setMinimumWidth(250);
-//    dockView->show();
-//    QDockWidget *dockWidget = new QDockWidget;
-//    dockWidget->setWidget(dockView);
-//    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 }
 
 void FMap::addCable()
@@ -50,11 +41,11 @@ void FMap::mousePressEvent(QMouseEvent *e)
 {
     if (inAddCable)
     {
-        QPoint p = mapTo(this, e->pos());
+        QPointF p = view->mapToScene(e->pos());
         if (a.isNull())
             a = p;
         else {
-            QLine l(a, p);
+            QLineF l(a, p);
             scene->addLine(l);
             scene->addEllipse(QRectF(a.x(), a.y(), 10, 10));
 
