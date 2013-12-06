@@ -13,6 +13,8 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-           fmap.cpp
+           fmap.cpp \
+    fdiagram.cpp
 
-HEADERS  += fmap.h
+HEADERS  += fmap.h \
+    fdiagram.h

@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtSvg>
 #include "fmap.h"
+#include "fdiagram.h"
 
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
@@ -24,14 +25,14 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     setCentralWidget(view);
 
     // Dock view for box diagram
-    dockScene = new QGraphicsScene;
-    dockScene->addText("Dock widget");
-    dockView = new QGraphicsView(dockScene);
-    dockView->setMinimumWidth(250);
-    dockView->show();
-    QDockWidget *dockWidget = new QDockWidget;
-    dockWidget->setWidget(dockView);
-    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
+//    dockScene = new QGraphicsScene;
+//    dockScene->addText("Dock widget");
+//    dockView = new QGraphicsView(dockScene);
+//    dockView->setMinimumWidth(250);
+//    dockView->show();
+//    QDockWidget *dockWidget = new QDockWidget;
+//    dockWidget->setWidget(dockView);
+//    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 }
 
 void FMap::addCable()
@@ -49,7 +50,7 @@ void FMap::mousePressEvent(QMouseEvent *e)
 {
     if (inAddCable)
     {
-        QPoint p = mapTo(this, e->globalPos());
+        QPoint p = mapTo(this, e->pos());
         if (a.isNull())
             a = p;
         else {
@@ -59,8 +60,14 @@ void FMap::mousePressEvent(QMouseEvent *e)
 
             QGraphicsEllipseItem *ell = new QGraphicsEllipseItem(p.x(), p.y(), 10, 10);
             ell->setFlags(QGraphicsItem::ItemIsSelectable);
-            connect(ell, SIGNAL(isSelected()), this, SLOT(drawBox()));
             scene->addItem(ell);
+
+            Fdiagram *dgrm = new Fdiagram;
+            scene->addItem(dgrm);
+            dgrm->setRect(0, 0, 250, 250);
+            dgrm->setPos(500, 500);
+            ell->installSceneEventFilter(dgrm);
+
 
             // Clear data
             a = QPoint(0, 0);
