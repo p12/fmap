@@ -8,11 +8,12 @@ Fdiagram::Fdiagram()
 
 bool Fdiagram::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
 {
+
     if (event->type() == QEvent::GraphicsSceneMousePress)
-        if(!watched->isSelected())
-            setVisible(1);
-        else
+        if(isVisible())
             setVisible(0);
+        else
+            setVisible(1);
 
     //    qDebug() << "in fiter event" << event->type();
     return false;

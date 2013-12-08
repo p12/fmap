@@ -13,16 +13,15 @@ public:
     FMap(QWidget* parent = 0);
 
 public slots:
-    void addCable();
+    void createBox();
+    void createCable();
     void drawBox();
 
 private:
-    QGraphicsScene *scene,
-                   *dockScene;
-    QGraphicsView *view,
-                  *dockView;
+    QGraphicsScene *scene;
+    QGraphicsView *view;
     QPointF a;
-    bool inAddCable;
+    bool inCreateBox;
 
 protected:
     void mousePressEvent(QMouseEvent *);
