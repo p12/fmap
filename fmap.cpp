@@ -15,10 +15,14 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     view->show();
 
     // Create menus
+    QMenu *file = menuBar()->addMenu(tr("&File"));
+    file->addAction("Save", this, SLOT(save()), QKeySequence("Ctrl+S"));
+    file->addAction("Open", this, SLOT(open()), QKeySequence("Ctrl+O"));
+    file->addAction("Quit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
+
     QMenu *add = menuBar()->addMenu(tr("&Add"));
     add->addAction("Add Box", this, SLOT(createBox()), QKeySequence("B"));
     add->addAction("Add Cable", this, SLOT(createCable()), QKeySequence("C"));
-    add->addAction("Quit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
 
     setCentralWidget(view);
 }
@@ -38,9 +42,69 @@ void FMap::createCable()
             if (qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[1]) )
             {
                 QLineF l(lst[0]->pos(), lst[1]->pos());
-                scene->addLine(l);
+                cblVec << scene->addLine(l);
             }
     }
+}
+
+void FMap::save()
+{
+    QFile file("map-file.dat");
+    file.open(QIODevice::WriteOnly);
+    QDataStream out(&file);
+
+    // Saving boxes
+    out << boxVec.count();
+    foreach (QGraphicsEllipseItem *el, boxVec)
+        out << el->pos();
+
+    // Saving cables
+    out << cblVec.count();
+    foreach (QGraphicsLineItem *l, cblVec)
+    {
+        out << l->line().p1();
+        out << l->line().p2();
+    }
+}
+
+void FMap::open()
+{
+    QFile file("map-file.dat");
+    file.open(QIODevice::ReadOnly);
+    QDataStream in(&file);
+    int count = 0;
+    QPointF p, k;
+
+    // Reading boxes
+    in >> count;
+    while (count--)
+    {
+        in >> p;
+        drawBox(p);
+    }
+
+    // Reading cables
+    in >> count;
+    while (count--)
+    {
+        in >> p >> k;
+        cblVec << scene->addLine(QLineF(p, k));
+    }
+}
+
+void FMap::drawBox(QPointF p)
+{
+    QGraphicsEllipseItem *ell = new QGraphicsEllipseItem(0, 0, 30, 30);
+    ell->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    scene->addItem(ell);
+    ell->setPos(p);
+    boxVec << ell;
+
+    Fdiagram *dgrm = new Fdiagram;
+    scene->addItem(dgrm);
+    dgrm->setRect(0, 0, 250, 250);
+    dgrm->setPos(p + QPoint(50, 50));
+    ell->installSceneEventFilter(dgrm);
 }
 
 void FMap::mousePressEvent(QMouseEvent *e)
@@ -49,21 +113,9 @@ void FMap::mousePressEvent(QMouseEvent *e)
     {
         QPoint t = view->mapFromGlobal(e->pos());
         QPointF p = view->mapToScene(t);
-
-        QGraphicsEllipseItem *ell = new QGraphicsEllipseItem(0, 0, 30, 30);
-        ell->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-        scene->addItem(ell);
-        ell->setPos(p);
-
-        Fdiagram *dgrm = new Fdiagram;
-        scene->addItem(dgrm);
-        dgrm->setRect(0, 0, 250, 250);
-        dgrm->setPos(p + QPoint(50, 50));
-        ell->installSceneEventFilter(dgrm);
-
+        drawBox(p);
 
         // Clear data
-        a = QPoint(0, 0);
         inCreateBox = false;
         setCursor(Qt::ArrowCursor);
     }
