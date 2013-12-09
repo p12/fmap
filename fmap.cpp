@@ -14,19 +14,13 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     view = new QGraphicsView(scene);
     view->show();
 
-    // Create actions
-    QAction * addBox = new QAction("Add Box", this);
-    connect(addBox, SIGNAL(triggered()), this, SLOT(createBox()));
-    QAction * addCable = new QAction("Add Cable", this);
-    connect(addCable, SIGNAL(triggered()), this, SLOT(createCable()));
-
     // Create menus
     QMenu *add = menuBar()->addMenu(tr("&Add"));
-    add->addAction(addBox);
-    add->addAction(addCable);
+    add->addAction("Add Box", this, SLOT(createBox()), QKeySequence("B"));
+    add->addAction("Add Cable", this, SLOT(createCable()), QKeySequence("C"));
+    add->addAction("Quit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
 
     setCentralWidget(view);
-
 }
 
 void FMap::createBox()
@@ -37,26 +31,16 @@ void FMap::createBox()
 
 void FMap::createCable()
 {
-
     QList<QGraphicsItem*> lst = scene->selectedItems();
     if (lst.count() == 2)
     {
-
         if (qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[0]) )
             if (qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[1]) )
             {
                 QLineF l(lst[0]->pos(), lst[1]->pos());
                 scene->addLine(l);
             }
-
     }
-    else
-        QDialog();
-}
-
-void FMap::drawBox()
-{
-
 }
 
 void FMap::mousePressEvent(QMouseEvent *e)

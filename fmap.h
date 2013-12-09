@@ -15,7 +15,6 @@ public:
 public slots:
     void createBox();
     void createCable();
-    void drawBox();
 
 private:
     QGraphicsScene *scene;
