@@ -6,6 +6,7 @@
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
+    inCreateBox = false;
     scene = new QGraphicsScene;
     //    scene->addText("Hello, world!");
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
