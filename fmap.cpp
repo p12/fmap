@@ -21,9 +21,12 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     file->addAction("Open", this, SLOT(open()), QKeySequence("Ctrl+O"));
     file->addAction("Quit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
 
-    QMenu *add = menuBar()->addMenu(tr("&Add"));
+    QMenu *add = menuBar()->addMenu(tr("&Items"));
     add->addAction("Add Box", this, SLOT(createBox()), QKeySequence("B"));
     add->addAction("Add Cable", this, SLOT(createCable()), QKeySequence("C"));
+
+    QMenu *edit = menuBar()->addMenu(tr("&Edit"));
+    edit->addAction("Delete", this, SLOT(del()), QKeySequence("Del"));
 
     setCentralWidget(view);
 }
@@ -44,6 +47,7 @@ void FMap::createCable()
             {
                 QLineF l(lst[0]->pos(), lst[1]->pos());
                 cblVec << scene->addLine(l);
+                cblVec.last()->setFlags(QGraphicsItem::ItemIsSelectable);
             }
     }
 }
@@ -93,10 +97,30 @@ void FMap::open()
     }
 }
 
+void FMap::del()
+{
+    QList<QGraphicsItem*> lst = scene->selectedItems();
+    foreach (QGraphicsItem *i, lst) {
+        if (QGraphicsEllipseItem * e = qgraphicsitem_cast<QGraphicsEllipseItem *>(i) )
+        {
+            int i = boxVec.indexOf(e);
+            boxVec.remove(i, 1);
+            scene->removeItem(e);
+            scene->removeItem(dgrmVec[i]);
+            dgrmVec.remove(i, 1);
+        }
+        else if (QGraphicsLineItem * l = qgraphicsitem_cast<QGraphicsLineItem *>(i))
+        {
+            cblVec.remove(cblVec.indexOf(l), 1);
+            scene->removeItem(l);
+        }
+    }
+}
+
 void FMap::drawBox(QPointF p)
 {
     QGraphicsEllipseItem *ell = new QGraphicsEllipseItem(0, 0, 30, 30);
-    ell->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    ell->setFlags(QGraphicsItem::ItemIsSelectable);
     scene->addItem(ell);
     ell->setPos(p);
     boxVec << ell;
@@ -106,6 +130,7 @@ void FMap::drawBox(QPointF p)
     dgrm->setRect(0, 0, 250, 250);
     dgrm->setPos(p + QPoint(50, 50));
     ell->installSceneEventFilter(dgrm);
+    dgrmVec << dgrm;
 }
 
 void FMap::mousePressEvent(QMouseEvent *e)

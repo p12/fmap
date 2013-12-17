@@ -7,6 +7,7 @@ class QGraphicsScene;
 class QGraphicsView;
 class QGraphicsEllipseItem;
 class QGraphicsLineItem;
+class Fdiagram;
 
 class FMap : public QMainWindow
 {
@@ -20,6 +21,7 @@ public slots:
     void createCable();
     void save();
     void open();
+    void del();
 
 private:
     QGraphicsScene *scene;
@@ -28,6 +30,7 @@ private:
     bool inCreateBox;
     QVector<QGraphicsEllipseItem *> boxVec;
     QVector<QGraphicsLineItem *> cblVec;
+    QVector<Fdiagram *> dgrmVec;
 
     void drawBox(QPointF p);
 
