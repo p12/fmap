@@ -28,7 +28,12 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     QMenu *edit = menuBar()->addMenu(tr("&Edit"));
     edit->addAction("Delete", this, SLOT(del()), QKeySequence("Del"));
 
+    QMenu *show = menuBar()->addMenu(tr("&View"));
+    show->addAction("Zoom in", this, SLOT(zoomIn()), QKeySequence(QKeySequence::ZoomIn));
+    show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence(QKeySequence::ZoomOut));
+
     setCentralWidget(view);
+
 }
 
 void FMap::createBox()
@@ -115,6 +120,16 @@ void FMap::del()
             scene->removeItem(l);
         }
     }
+}
+
+void FMap::zoomIn()
+{
+    view->scale(1.25, 1.25);
+}
+
+void FMap::zoomOut()
+{
+    view->scale(0.75, 0.75);
 }
 
 void FMap::drawBox(QPointF p)

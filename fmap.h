@@ -22,6 +22,8 @@ public slots:
     void save();
     void open();
     void del();
+    void zoomIn();
+    void zoomOut();
 
 private:
     QGraphicsScene *scene;
