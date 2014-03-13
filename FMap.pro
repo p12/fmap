@@ -14,7 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
            fmap.cpp \
-    fdiagram.cpp
+    fdiagram.cpp \
+    fbox.cpp
 
 HEADERS  += fmap.h \
-    fdiagram.h
+    fdiagram.h \
+    fbox.h

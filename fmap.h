@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QVector>
+#include <QPair>
 class QGraphicsScene;
 class QGraphicsView;
 class QGraphicsEllipseItem;
@@ -28,13 +29,14 @@ public slots:
 private:
     QGraphicsScene *scene;
     QGraphicsView *view;
-    QPointF a;
     bool inCreateBox;
     QVector<QGraphicsEllipseItem *> boxVec;
     QVector<QGraphicsLineItem *> cblVec;
     QVector<Fdiagram *> dgrmVec;
-
+    QVector<QPair<int, int> > cb2bx;  // Links cable to boxes
     void drawBox(QPointF p);
+    void drawDgrm(QPointF p);
+    void drawCable(int a, int b);
 
 protected:
     void mousePressEvent(QMouseEvent *);

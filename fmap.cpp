@@ -8,7 +8,6 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
     inCreateBox = false;
     scene = new QGraphicsScene;
-    //    scene->addText("Hello, world!");
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
     scene->addItem(map);
 
@@ -33,7 +32,6 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence(QKeySequence::ZoomOut));
 
     setCentralWidget(view);
-
 }
 
 void FMap::createBox()
@@ -47,12 +45,14 @@ void FMap::createCable()
     QList<QGraphicsItem*> lst = scene->selectedItems();
     if (lst.count() == 2)
     {
-        if (qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[0]) )
-            if (qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[1]) )
+        QGraphicsEllipseItem *a, *b;
+        if (a = qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[0]) )
+            if (b = qgraphicsitem_cast<QGraphicsEllipseItem *>(lst[1]) )
             {
-                QLineF l(lst[0]->pos(), lst[1]->pos());
-                cblVec << scene->addLine(l);
-                cblVec.last()->setFlags(QGraphicsItem::ItemIsSelectable);
+                int i = boxVec.indexOf(a);
+                int k = boxVec.indexOf(b);
+                cb2bx << QPair<int, int>(i, k);
+                drawCable(i, k);
             }
     }
 }
@@ -63,18 +63,15 @@ void FMap::save()
     file.open(QIODevice::WriteOnly);
     QDataStream out(&file);
 
-    // Saving boxes
-    out << boxVec.count();
-    foreach (QGraphicsEllipseItem *el, boxVec)
-        out << el->pos();
+    // Saving
+    // boxes and diagrams
+    out << boxVec.size();
+    for (int i = 0; i < boxVec.size(); i++)
+        out << boxVec[i]->pos()
+            << dgrmVec[i]->addr->text();
 
-    // Saving cables
-    out << cblVec.count();
-    foreach (QGraphicsLineItem *l, cblVec)
-    {
-        out << l->line().p1();
-        out << l->line().p2();
-    }
+    // links
+    out << cb2bx;
 }
 
 void FMap::open()
@@ -82,24 +79,29 @@ void FMap::open()
     QFile file("map-file.dat");
     file.open(QIODevice::ReadOnly);
     QDataStream in(&file);
-    int count = 0;
-    QPointF p, k;
 
-    // Reading boxes
-    in >> count;
-    while (count--)
+    int sz = 0;
+    QPointF p;
+    QString str;
+
+    // Reading
+    // boxes and diagrams
+    in >> sz;
+    for (int i = 0; i < sz; i++)
     {
-        in >> p;
+        in >> p >> str;
         drawBox(p);
+        drawDgrm(p +  QPoint(50, 0));
+        dgrmVec[i]->addr->setText(str);
     }
 
-    // Reading cables
-    in >> count;
-    while (count--)
-    {
-        in >> p >> k;
-        cblVec << scene->addLine(QLineF(p, k));
-    }
+    // links
+    in >> cb2bx;
+
+    // cables
+    QPair<int,int> d;
+    foreach (d, cb2bx)
+        drawCable(d.first, d.second);
 }
 
 void FMap::del()
@@ -139,13 +141,27 @@ void FMap::drawBox(QPointF p)
     scene->addItem(ell);
     ell->setPos(p);
     boxVec << ell;
+}
 
+void FMap::drawDgrm(QPointF p)
+{
     Fdiagram *dgrm = new Fdiagram;
     scene->addItem(dgrm);
-    dgrm->setRect(0, 0, 250, 250);
-    dgrm->setPos(p + QPoint(50, 50));
-    ell->installSceneEventFilter(dgrm);
+    dgrm->setPos(p);
+    boxVec.last()->installSceneEventFilter(dgrm);
     dgrmVec << dgrm;
+}
+
+void FMap::drawCable(int a, int b)
+{
+    cblVec << scene->addLine(QLineF(boxVec[a]->pos(), boxVec[b]->pos()));
+    cblVec.last()->setFlags(QGraphicsItem::ItemIsSelectable);
+    QPen pen;
+    pen.setWidth(2);
+    cblVec.last()->setPen(pen);
+
+    dgrmVec[a]->addCable("XXX");
+    dgrmVec[b]->addCable("XXX");
 }
 
 void FMap::mousePressEvent(QMouseEvent *e)
@@ -155,9 +171,11 @@ void FMap::mousePressEvent(QMouseEvent *e)
         QPoint t = view->mapFromGlobal(e->pos());
         QPointF p = view->mapToScene(t);
         drawBox(p);
+        drawDgrm(p + QPoint(50, 0));
 
         // Clear data
         inCreateBox = false;
         setCursor(Qt::ArrowCursor);
     }
 }
+
