@@ -10,11 +10,11 @@ class Fline : public QGraphicsLineItem
 {
 public:
     Fline();
-    Fbox *b1;
-    Fbox *b2;
-    Fcable *c1;
-    Fcable *c2;
-    int mc, fc;     // count modules and fibers
+    Fbox *box1;
+    Fbox *box2;
+    Fcable *cable1;
+    Fcable *cable2;
+    int moduleCount, fiberCount;     // count modules and fibers
     enum { Type = UserType + 2 };
     int type() const
         {

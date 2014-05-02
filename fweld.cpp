@@ -1,12 +1,11 @@
-#include "fline.h"
-#include "fbox.h"
+#include "fweld.h"
 #include <QPen>
 
-Fline::Fline()
+Fweld::Fweld()
 {
     setFlags(QGraphicsItem::ItemIsSelectable);
     QPen pen;
-    pen.setColor(Qt::gray);
     pen.setWidth(2);
+    pen.setColor(Qt::gray);
     setPen(pen);
 }

@@ -15,8 +15,20 @@ TEMPLATE = app
 SOURCES += main.cpp\
            fmap.cpp \
     fdiagram.cpp \
-    fbox.cpp
+    fbox.cpp \
+    fline.cpp \
+    fcable.cpp \
+    ffiber.cpp \
+    fweld.cpp \
+    fhomeweld.cpp \
+    fmodule.cpp
 
 HEADERS  += fmap.h \
     fdiagram.h \
-    fbox.h
+    fbox.h \
+    fline.h \
+    fcable.h \
+    ffiber.h \
+    fweld.h \
+    fhomeweld.h \
+    fmodule.h

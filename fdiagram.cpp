@@ -1,67 +1,190 @@
 #include "fdiagram.h"
+#include "fcable.h"
+#include "ffiber.h"
+#include "fweld.h"
+#include "fhomeweld.h"
+
 #include <QtGui>
+#include <QtGlobal>
 
 const int MRGN = 25;
-Fdiagram::Fdiagram()
+const int WMIN = 150;
+
+Fdiagram::Fdiagram(QGraphicsItem *p) : QGraphicsRectItem(p)
 {
-    setVisible(0);
-    setRect(0, 0, 150, 250);
+    setVisible(1);
+    setRect(0, 0, WMIN, 250);
+    setBrush(Qt::white);
 
     // Address of box
-    addr = new QLineEdit;
-    addr->setFixedWidth(100);
-    QGraphicsProxyWidget *proxy = new QGraphicsProxyWidget(this);
-    proxy->setWidget(addr);
-    proxy->setPos(25, 5);
+    addr = new QGraphicsTextItem("Street 11", this);
+    addr->setTextInteractionFlags(Qt::TextEditorInteraction);
+    addr->setPos(25, 5);
 }
 
-void Fdiagram::addCable(QString s)
+void Fdiagram::addCable(int m, int f, QString s)
 {
-    QRectF r(0, 0, 70, 100);
-    cVec << new QGraphicsRectItem(r, this);
-
-    // check Fdiagram width
-    int w = MRGN;
-    foreach (QGraphicsRectItem *r, cVec)
-        w += r->rect().width() + MRGN;
-    if (rect().width() < w)
-    {
-        setRect(0, 0, w, rect().height());
-        addr->setFixedWidth(w - 2 * MRGN);
-    }
-
-    // set position per cable count
-    int x, y, bW, cW;
-    bW = rect().width();     // Box width
-    y = (rect().height() - cVec[0]->rect().height()) / 2;
-    x = (bW  - cVec[0]->rect().width()) / 2;
-
-    switch (cVec.size())
-    {
-    case 1:
-        cVec[0]->setPos(x, y);
-        break;
-    case 2:
-        cVec[0]->setPos(MRGN, y);
-        cW = cVec[1]->rect().width();   // Cable width
-        cVec[1]->setPos(bW - MRGN - cW, y);
-        break;
-    case 3:
-        cVec[0]->setPos(x, y);
-        cVec[1]->setPos(MRGN, y);
-        cW = cVec[2]->rect().width();    // Cable width
-        cVec[2]->setPos(bW - MRGN - cW, y);
-        break;
-    }
+    cables << new Fcable(m, f, s, this);
+    resize();
 }
 
-bool Fdiagram::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
+void Fdiagram::delCable(Fcable *c)
+{
+    int i = cables.indexOf(c);
+    if (i < 0)
+        return;
+
+    // remove welds connected to this cable
+    foreach (Fweld *w, welds) {
+        if (w->cable1 == c || w->cable2 == c)
+            delWeld(w);
+    }
+
+    // remove homeWelds also
+    foreach (FhomeWeld *homeWeld, homeWelds) {
+        if (homeWeld->cable == c)
+            delHomeWeld(homeWeld);
+    }
+
+    delete cables[i];
+    cables.remove(i);
+    resize();
+}
+
+void Fdiagram::addWeld(Ffiber *a, Ffiber *b)
+{
+    Fweld *weld = new Fweld;
+    weld->fiber1 = a;
+    weld->fiber2 = b;
+    weld->cable1 = qgraphicsitem_cast<Fcable *>(a->parentItem());
+    weld->cable2 = qgraphicsitem_cast<Fcable *>(b->parentItem());
+
+    drawWeld(weld);
+
+    weld->setParentItem(this);
+    welds << weld;
+}
+
+void Fdiagram::addHomeWeld(Ffiber *fiber)
+{
+    FhomeWeld *homeWeld = new FhomeWeld;
+    homeWeld->fiber = fiber;
+    homeWeld->cable = qgraphicsitem_cast<Fcable *>(fiber->parentItem());
+
+    drawHomeWeld(homeWeld);
+
+    homeWeld->setParentItem(this);
+    homeWelds << homeWeld;
+}
+
+void Fdiagram::delWeld(Fweld *w)
+{
+    int i = welds.indexOf(w);
+    if (i >= 0)
+        welds.remove(i);
+    delete w;
+}
+
+void Fdiagram::delHomeWeld(FhomeWeld *homeWeld)
+{
+    int pos = homeWelds.indexOf(homeWeld);
+    if (pos >= 0)
+        homeWelds.remove(pos);
+    delete homeWeld;
+}
+
+bool Fdiagram::sceneEventFilter(QGraphicsItem */*watched*/, QEvent *event)
 {
     if (event->type() == QEvent::GraphicsSceneMousePress)
+    {
         if(isVisible())
             setVisible(0);
         else
             setVisible(1);
+    }
 
     return false;
+}
+
+void Fdiagram::resize()
+{
+    // set position per cable count
+    int x, y = rect().height() / 3;
+    QPointF first(MRGN, y);
+
+    switch (cables.size())
+    {
+    case 1 :
+        // set pos 0
+        cables[0]->setPos(first);
+        break;
+    case 2 :
+        // set pos 0 1
+        cables[0]->setPos(first);
+        x = cables[0]->rect().right() + MRGN * 2;
+        cables[1]->setPos(x, y);
+        break;
+    case 3 :
+        // set pos 1 0 2
+        cables[1]->setPos(first);
+        x = cables[1]->rect().right() + MRGN * 2;
+        cables[0]->setPos(x, y);
+        x = cables[0]->x() + cables[0]->rect().width() + MRGN;
+        cables[2]->setPos(x, y);
+        break;
+    case 4 :
+        // set pos 1 0 2/3
+        cables[1]->setPos(first);
+        x = cables[1]->rect().right() + MRGN * 2;
+        cables[0]->setPos(x, rect().height() / 2);
+        x = cables[0]->x() + cables[0]->rect().width() + MRGN;
+        cables[2]->setPos(x, y);
+        y += cables[2]->rect().height() + MRGN;
+        cables[3]->setPos(x, y);
+        break;
+    }
+
+    foreach (Fweld *weld, welds)
+        drawWeld(weld);
+    foreach (FhomeWeld *homeWeld, homeWelds)
+        drawHomeWeld(homeWeld);
+
+    // check Fdiagram size
+    qreal width = 100.0;
+    qreal height = 150.0;
+
+    foreach (Fcable *cable, cables) {
+        width  = qMax(width,  cable->x() + cable->rect().width());
+        height = qMax(height, cable->y() + cable->rect().height());
+    }
+
+    setRect(0, 0, width + MRGN, height + MRGN);
+}
+
+void Fdiagram::drawWeld(Fweld *weld)
+{
+    QPointF pointA = mapFromScene(weld->fiber1->scenePos());
+    QPointF pointB = mapFromScene(weld->fiber2->scenePos());
+
+    // find right corner of left item
+    if (pointB.x() > pointA.x())
+        pointA.rx() += weld->fiber1->rect().width();
+    else
+        pointB.rx() += weld->fiber2->rect().width();
+
+    // find center of height
+    pointA.ry() += weld->fiber1->rect().height() / 2;
+    pointB.ry() += weld->fiber2->rect().height() / 2;
+
+    weld->setLine(QLineF(pointA, pointB));
+}
+
+void Fdiagram::drawHomeWeld(FhomeWeld *homeWeld)
+{
+    QPointF point = mapFromScene(homeWeld->fiber->scenePos());
+
+    point.rx() += homeWeld->fiber->rect().width();
+    point.ry() += homeWeld->fiber->rect().height() / 2;
+
+    homeWeld->setPos(point);
 }
