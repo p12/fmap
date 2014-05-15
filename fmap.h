@@ -7,10 +7,13 @@
 class QGraphicsScene;
 class QGraphicsView;
 class Fbox;
+class Fdiagram;
 class Fline;
 class Ffiber;
 class Fweld;
 class FhomeWeld;
+class Fscene;
+class FdiagramStack;
 
 
 class FMap : public QMainWindow
@@ -23,6 +26,7 @@ public:
 public slots:
     void createBox();
     void createLine();
+    void createWeld();
     void createHomeWeld();
     void save();
     void open();
@@ -32,16 +36,20 @@ public slots:
 
 private:
     QGraphicsScene *scene;
-    QGraphicsView *view;
+//    Fscene *scene;
+    QGraphicsScene *diagramScene;
+    FdiagramStack *stack;
+    QGraphicsView *view, *diagramView;
     bool inCreateBox;
     QVector<Fbox *> boxes;
+    QVector<Fdiagram *> diagrams;
     QVector<Fline *> lines;
     QVector<Fweld *> welds;
     void drawBox(QPointF point);
     void drawCable(Fbox *aBox, Fbox *bBox, int moduleCount, int fiberCount);
     void drawWeld(Ffiber *a, Ffiber *b);
     void drawHomeWeld(Ffiber *fiber);
-    void delCable(Fline *l);
+    void delCable(Fline *line);
     void delWeld(Fweld *w);
     void delHomeWeld(FhomeWeld *homeWeld);
 

@@ -10,16 +10,16 @@
 const int MRGN = 25;
 const int WMIN = 150;
 
-Fdiagram::Fdiagram(QGraphicsItem *p) : QGraphicsRectItem(p)
+Fdiagram::Fdiagram()
 {
-    setVisible(1);
+    setVisible(0);
     setRect(0, 0, WMIN, 250);
     setBrush(Qt::white);
 
     // Address of box
-    addr = new QGraphicsTextItem("Street 11", this);
-    addr->setTextInteractionFlags(Qt::TextEditorInteraction);
-    addr->setPos(25, 5);
+    address = new QGraphicsTextItem("Street 11", this);
+    address->setPos(25, 5);
+
 }
 
 void Fdiagram::addCable(int m, int f, QString s)
@@ -48,6 +48,34 @@ void Fdiagram::delCable(Fcable *c)
 
     delete cables[i];
     cables.remove(i);
+    resize();
+}
+
+void Fdiagram::moveCable(Fcable *cable, bool right)
+{
+    int p = cables.indexOf(cable);
+    if (right > 0)
+    {
+        // Moving cable right
+        int q = p + 1;
+        if ( p >= 0 && q < cables.size() )
+        {
+            Fcable *tmp = cables[p];
+            cables[p] = cables[q];
+            cables[q] = tmp;
+        }
+    }
+    else
+    {
+        // Moving left
+        int q = p - 1;
+        if ( q >= 0 && p < cables.size() )
+        {
+            Fcable *tmp = cables[p];
+            cables[p] = cables[q];
+            cables[q] = tmp;
+        }
+    }
     resize();
 }
 
@@ -93,17 +121,9 @@ void Fdiagram::delHomeWeld(FhomeWeld *homeWeld)
     delete homeWeld;
 }
 
-bool Fdiagram::sceneEventFilter(QGraphicsItem */*watched*/, QEvent *event)
+int Fdiagram::type() const
 {
-    if (event->type() == QEvent::GraphicsSceneMousePress)
-    {
-        if(isVisible())
-            setVisible(0);
-        else
-            setVisible(1);
-    }
-
-    return false;
+    return Type;
 }
 
 void Fdiagram::resize()
@@ -125,19 +145,19 @@ void Fdiagram::resize()
         cables[1]->setPos(x, y);
         break;
     case 3 :
-        // set pos 1 0 2
-        cables[1]->setPos(first);
-        x = cables[1]->rect().right() + MRGN * 2;
-        cables[0]->setPos(x, y);
-        x = cables[0]->x() + cables[0]->rect().width() + MRGN;
+        // set pos 0 1 2
+        cables[0]->setPos(first);
+        x = cables[0]->rect().right() + MRGN * 2;
+        cables[1]->setPos(x, y);
+        x = cables[1]->x() + cables[1]->rect().width() + MRGN;
         cables[2]->setPos(x, y);
         break;
     case 4 :
-        // set pos 1 0 2/3
-        cables[1]->setPos(first);
-        x = cables[1]->rect().right() + MRGN * 2;
-        cables[0]->setPos(x, rect().height() / 2);
-        x = cables[0]->x() + cables[0]->rect().width() + MRGN;
+        // set pos 0 1 2/3
+        cables[0]->setPos(first);
+        x = cables[0]->rect().right() + MRGN * 2;
+        cables[1]->setPos(x, y);
+        x = cables[1]->x() + cables[1]->rect().width() + MRGN;
         cables[2]->setPos(x, y);
         y += cables[2]->rect().height() + MRGN;
         cables[3]->setPos(x, y);
@@ -188,3 +208,14 @@ void Fdiagram::drawHomeWeld(FhomeWeld *homeWeld)
 
     homeWeld->setPos(point);
 }
+
+QString Fdiagram::getAddress() const
+{
+  return address->toPlainText();
+}
+
+void Fdiagram::setAddress(QString value)
+{
+  address->setPlainText(value);
+}
+

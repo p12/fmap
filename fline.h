@@ -16,10 +16,7 @@ public:
     Fcable *cable2;
     int moduleCount, fiberCount;     // count modules and fibers
     enum { Type = UserType + 2 };
-    int type() const
-        {
-            return Type;
-        }
+    int type() const;
 };
 
 #endif // FLINE_H

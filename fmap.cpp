@@ -11,19 +11,23 @@
 #include "fhomeweld.h"
 #include "fcable.h"
 #include "fmodule.h"
+#include "fscene.h"
+#include "fdiagramstack.h"
 
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
     inCreateBox = false;
     scene = new QGraphicsScene;
+//    scene = new Fscene;
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
     scene->addItem(map);
 
     view = new QGraphicsView(scene);
     view->setRenderHints(QPainter::Antialiasing);
-    //   view->setDragMode(QGraphicsView::ScrollHandDrag);
     view->show();
+
+    stack = new FdiagramStack;
 
     // Create menus
     QMenu *file = menuBar()->addMenu(tr("&File"));
@@ -34,6 +38,7 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     QMenu *add = menuBar()->addMenu(tr("&Items"));
     add->addAction("Add Box", this, SLOT(createBox()), QKeySequence("B"));
     add->addAction("Add Line", this, SLOT(createLine()), QKeySequence("L"));
+    add->addAction("Add Weld", this, SLOT(createWeld()), QKeySequence("W"));
     add->addAction("Add Home weld", this, SLOT(createHomeWeld()), QKeySequence("H"));
 
     QMenu *edit = menuBar()->addMenu(tr("&Edit"));
@@ -43,7 +48,23 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     show->addAction("Zoom in", this, SLOT(zoomIn()), QKeySequence(QKeySequence("Z")));
     show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence(QKeySequence("Ctrl+Z")));
 
-    setCentralWidget(view);
+    // Diagrams view setup
+    diagramScene = new QGraphicsScene;
+
+    diagramView = new QGraphicsView(diagramScene);
+    diagramView->show();
+    diagramView->setFixedWidth(500);
+    diagramView->setRenderHints(QPainter::Antialiasing);
+
+    QHBoxLayout *hLayout = new QHBoxLayout;
+    hLayout->addWidget(diagramView);
+    hLayout->addWidget(view);
+    hLayout->setMargin(0);
+    hLayout->setSpacing(0);
+
+    QWidget *widget = new QWidget;
+    widget->setLayout(hLayout);
+    setCentralWidget(widget);
 }
 
 void FMap::createBox()
@@ -63,12 +84,23 @@ void FMap::createLine()
 
     if (box1 && box2)
     {
-        // TODO: cancel button handle
-        int m = QInputDialog::getInt(this, "Input modules", "Modules:", 3, 1, 4);
-        int f = QInputDialog::getInt(this, "Input fibers", "Fibers:", 4, 1, 100);
+        bool ok;
+        int m = QInputDialog::getInt(this, "Input modules count in cable.", "Modules:", 3, 1, 10, 1, &ok);
+        if (!ok)
+            return;
+
+        int f = QInputDialog::getInt(this, "Input fibers count in module.", "Fibers:", 4, 1, 100, 1, &ok);
+        if (!ok)
+            return;
         drawCable(box1, box2, m, f);
-        return;
     }
+}
+
+void FMap::createWeld()
+{
+    QList<QGraphicsItem*> lst = diagramScene->selectedItems();
+    if (lst.count() != 2)
+        return;
 
     Ffiber *fiber1 = qgraphicsitem_cast<Ffiber *>(lst[0]);
     Ffiber *fiber2 = qgraphicsitem_cast<Ffiber *>(lst[1]);
@@ -111,7 +143,7 @@ void FMap::createLine()
 
 void FMap::createHomeWeld()
 {
-    QList<QGraphicsItem*> lst = scene->selectedItems();
+    QList<QGraphicsItem*> lst = diagramScene->selectedItems();
     if (lst.count() != 1)
         return;
 
@@ -129,9 +161,9 @@ void FMap::save()
     // Saving
     // boxes
     out << boxes.size();
-    foreach (Fbox *b, boxes) {
-        out << b->pos()
-            << b->diagram->addr->toPlainText();
+    foreach (Fbox *box, boxes) {
+        out << box->pos()
+            << box->getAddress();
     }
 
     // lines
@@ -190,7 +222,7 @@ void FMap::open()
     {
         in >> p >> str;
         drawBox(p);
-        boxes.last()->diagram->addr->setPlainText(str);
+        boxes.last()->setAddress(str);
     }
 
     // lines
@@ -222,30 +254,41 @@ void FMap::open()
 
 void FMap::del()
 {
-    QList<QGraphicsItem*> lst = scene->selectedItems();
-    foreach (QGraphicsItem *it, lst) {
-        if (Fbox *box = qgraphicsitem_cast<Fbox *>(it) )
-        {
-            int i = boxes.indexOf(box);
-            if (i < 0)
-                return;
-            foreach (Fline *line, box->lines)
-                delCable(line);
-            boxes.remove(i);
-            scene->removeItem(box);
-            delete box;
+    QList<QGraphicsItem*> lst;
+    if (scene->hasFocus())
+    {
+        lst = scene->selectedItems();
+        foreach (QGraphicsItem *it, lst) {
+            if (Fbox *box = qgraphicsitem_cast<Fbox *>(it) )
+            {
+                int i = boxes.indexOf(box);
+                if (i < 0)
+                    return;
+                foreach (Fline *line, box->lines)
+                    delCable(line);
+                boxes.remove(i);
+                scene->removeItem(box);
+                diagramScene->removeItem(box->diagram);
+                delete box;
+            }
+            else if (Fline * l = qgraphicsitem_cast<Fline *>(it))
+            {
+                delCable(l);
+            }
         }
-        else if (Fline * l = qgraphicsitem_cast<Fline *>(it))
-        {
-            delCable(l);
-        }
-        else if (Fweld * w = qgraphicsitem_cast<Fweld *>(it))
-        {
-            delWeld(w);
-        }
-        else if (FhomeWeld * home = qgraphicsitem_cast<FhomeWeld *>(it))
-        {
-            delHomeWeld(home);
+    }
+    else if (diagramScene->hasFocus())
+    {
+        lst = diagramScene->selectedItems();
+        foreach (QGraphicsItem *item, lst) {
+            if (Fweld * w = qgraphicsitem_cast<Fweld *>(item))
+            {
+                delWeld(w);
+            }
+            else if (FhomeWeld * home = qgraphicsitem_cast<FhomeWeld *>(item))
+            {
+                delHomeWeld(home);
+            }
         }
     }
 }
@@ -262,11 +305,13 @@ void FMap::zoomOut()
 
 void FMap::drawBox(QPointF point)
 {
-    Fbox *box = new Fbox();
+    Fbox *box = new Fbox;
+    box->setStack(stack);
     scene->addItem(box);
     box->setPos(point);
     boxes << box;
-    box->setupFilter();
+
+    diagramScene->addItem(box->diagram);
 }
 
 void FMap::drawCable(Fbox *aBox, Fbox *bBox, int moduleCount, int fiberCount)
@@ -283,8 +328,8 @@ void FMap::drawCable(Fbox *aBox, Fbox *bBox, int moduleCount, int fiberCount)
     aBox->lines << line;
     bBox->lines << line;
 
-    aBox->diagram->addCable(moduleCount, fiberCount, bBox->diagram->addr->toPlainText());
-    bBox->diagram->addCable(moduleCount, fiberCount, aBox->diagram->addr->toPlainText());
+    aBox->diagram->addCable(moduleCount, fiberCount, bBox->getAddress());
+    bBox->diagram->addCable(moduleCount, fiberCount, aBox->getAddress());
 
     // ptrs to dgrmA and dgrmB cables in line
     line->cable1 = aBox->diagram->cables.last();
@@ -309,18 +354,18 @@ void FMap::drawHomeWeld(Ffiber *fiber)
         dgram->addHomeWeld(fiber);
 }
 
-void FMap::delCable(Fline *l)
+void FMap::delCable(Fline *line)
 {
-    int k = lines.indexOf(l);
-    if (k < 0)
+    int pos = lines.indexOf(line);
+    if (pos < 0)
         return;
-    lines.remove(k);
-    scene->removeItem(l);
+    lines.remove(pos);
+    scene->removeItem(line);
 
-    l->box1->diagram->delCable(l->cable1);
-    l->box2->diagram->delCable(l->cable2);
+    line->box1->diagram->delCable(line->cable1);
+    line->box2->diagram->delCable(line->cable2);
 
-    delete l;
+    delete line;
 }
 
 void FMap::delWeld(Fweld *w)

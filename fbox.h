@@ -4,19 +4,29 @@
 #include <QGraphicsEllipseItem>
 class Fdiagram;
 class Fline;
+class FdiagramStack;
+class FtextItem;
 
 class Fbox : public QGraphicsEllipseItem
 {
 public:
     Fbox();
-    void setupFilter();
     Fdiagram *diagram;
     QVector<Fline *> lines;
+
     enum { Type = UserType + 1 };
-    int type() const
-        {
-            return Type;
-        }
+    QString getAddress() const;
+    FdiagramStack *getStack() const;
+    void setAddress(QString value);
+    void setStack(FdiagramStack *value);
+    int type() const;
+
+protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+private:
+    FdiagramStack *stack;
+    FtextItem *address;
 };
 
 #endif // FBOX_H

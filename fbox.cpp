@@ -1,16 +1,68 @@
 #include "fbox.h"
 #include "fdiagram.h"
+#include "fdiagramstack.h"
+#include "ftextitem.h"
+#include "fline.h"
+#include "fcable.h"
 
+#include <QEvent>
+#include <QDebug>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QtGlobal>
 
 Fbox::Fbox()
 {
     setFlags(QGraphicsItem::ItemIsSelectable);
     setRect(0, 0, 30, 30);
-    diagram = new Fdiagram(this);
-    diagram->setPos(0, 50);
+    diagram = new Fdiagram;
+    address = new FtextItem(this);
 }
 
-void Fbox::setupFilter()
+int Fbox::type() const
 {
-    installSceneEventFilter(diagram);
+    return Type;
 }
+
+QVariant Fbox::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemSelectedChange)
+    {
+        bool selected = value.toBool();
+        if (selected)
+            stack->push(diagram);
+        else
+            stack->pop(diagram);
+    }
+
+    return QGraphicsItem::itemChange(change, value);
+}
+
+QString Fbox::getAddress() const
+{
+    return address->toPlainText();
+}
+
+void Fbox::setAddress(QString value)
+{
+    address->setPlainText(value);
+    diagram->setAddress(value);
+    foreach (Fline *line, lines) {
+        if (line->box1 == this)
+            line->cable2->setAddress(value);
+        else if (line->box2 == this) {
+            line->cable1->setAddress(value);
+        }
+    }
+}
+
+FdiagramStack *Fbox::getStack() const
+{
+    return stack;
+}
+
+void Fbox::setStack(FdiagramStack *value)
+{
+    stack = value;
+}
+

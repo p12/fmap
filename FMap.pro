@@ -21,7 +21,10 @@ SOURCES += main.cpp\
     ffiber.cpp \
     fweld.cpp \
     fhomeweld.cpp \
-    fmodule.cpp
+    fmodule.cpp \
+    fscene.cpp \
+    fdiagramstack.cpp \
+    ftextitem.cpp
 
 HEADERS  += fmap.h \
     fdiagram.h \
@@ -31,4 +34,7 @@ HEADERS  += fmap.h \
     ffiber.h \
     fweld.h \
     fhomeweld.h \
-    fmodule.h
+    fmodule.h \
+    fscene.h \
+    fdiagramstack.h \
+    ftextitem.h

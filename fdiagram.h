@@ -14,27 +14,31 @@ class FhomeWeld;
 class Fdiagram : public QGraphicsRectItem
 {
 public:
-    Fdiagram(QGraphicsItem *p);
-    QGraphicsTextItem * addr;
+    Fdiagram();
+
     QVector<Fcable *> cables; //cables vector
     QVector<Fweld *> welds;
     QVector<FhomeWeld* > homeWelds;
     void addCable(int m, int f, QString s);
     void delCable(Fcable *c);
+    void moveCable(Fcable *cable, bool right);
     void addWeld(Ffiber *a, Ffiber *b);
     void addHomeWeld(Ffiber* fiber);
     void delWeld(Fweld *w);
     void delHomeWeld(FhomeWeld *homeWeld);
     enum { Type = UserType + 4 };
-    int type() const
-        {
-            return Type;
-        }
+    int type() const;
+    QString getAddress() const;
+    void setAddress(QString value);
+
 protected:
-    virtual bool sceneEventFilter(QGraphicsItem *, QEvent *event);
     void resize();
     void drawWeld(Fweld *weld);
     void drawHomeWeld(FhomeWeld* homeWeld);
+
+private:
+    QGraphicsTextItem *address;
+    QPointF oldPos;
 };
 
 #endif // FDIAGRAM_H

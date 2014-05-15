@@ -10,3 +10,8 @@ Fline::Fline()
     pen.setWidth(2);
     setPen(pen);
 }
+
+int Fline::type() const
+{
+    return Type;
+}
