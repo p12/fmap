@@ -11,10 +11,21 @@
 #include <QGraphicsView>
 #include <QtGlobal>
 
+const QColor colors[] = {
+("#ffa1a1"),
+("#caddac"),
+("#9eb9ff"),
+("#faebc3"),
+("#dfa654"),
+("#6f6b66"),
+("#dfdedb"),
+("#f2f2f1"),
+};
+
 Fbox::Fbox()
 {
     setFlags(QGraphicsItem::ItemIsSelectable);
-    setRect(0, 0, 30, 30);
+    setRect(-15, -15, 30, 30);
     diagram = new Fdiagram;
     address = new FtextItem(this);
 }
@@ -28,11 +39,26 @@ QVariant Fbox::itemChange(QGraphicsItem::GraphicsItemChange change, const QVaria
 {
     if (change == ItemSelectedChange)
     {
+        QPen pen(Qt::gray);
+        pen.setWidth(2);
         bool selected = value.toBool();
         if (selected)
+        {
             stack->push(diagram);
+            pen.setWidth(4);
+            for (int i = 0; i < lines.size(); i++)
+            {
+                pen.setColor(colors[i]);
+                lines[i]->setPen(pen);
+                diagram->cables[i]->setBrush(colors[i]);
+            }
+        }
         else
+        {
             stack->pop(diagram);
+            foreach (Fline* l, lines)
+                l->setPen(pen);
+        }
     }
 
     return QGraphicsItem::itemChange(change, value);

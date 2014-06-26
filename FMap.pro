@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     fmodule.cpp \
     fscene.cpp \
     fdiagramstack.cpp \
-    ftextitem.cpp
+    ftextitem.cpp \
+    flogicfiber.cpp
 
 HEADERS  += fmap.h \
     fdiagram.h \
@@ -37,4 +38,5 @@ HEADERS  += fmap.h \
     fmodule.h \
     fscene.h \
     fdiagramstack.h \
-    ftextitem.h
+    ftextitem.h \
+    flogicfiber.h

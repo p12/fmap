@@ -14,6 +14,7 @@ class Fweld;
 class FhomeWeld;
 class Fscene;
 class FdiagramStack;
+class FlogicFiber;
 
 
 class FMap : public QMainWindow
@@ -33,20 +34,20 @@ public slots:
     void del();
     void zoomIn();
     void zoomOut();
+    void tracePath();
 
 private:
-    QGraphicsScene *scene;
 //    Fscene *scene;
-    QGraphicsScene *diagramScene;
+    QGraphicsScene *diagramScene, *scene;
     FdiagramStack *stack;
     QGraphicsView *view, *diagramView;
     bool inCreateBox;
     QVector<Fbox *> boxes;
-    QVector<Fdiagram *> diagrams;
     QVector<Fline *> lines;
-    QVector<Fweld *> welds;
+    QVector<FlogicFiber *> logicFibers;
+    QVector<QVector<FlogicFiber *> > channels;
     void drawBox(QPointF point);
-    void drawCable(Fbox *aBox, Fbox *bBox, int moduleCount, int fiberCount);
+    void drawCable(Fbox *box1, Fbox *box2, int moduleCount, QVector<FlogicFiber *> &fibers);
     void drawWeld(Ffiber *a, Ffiber *b);
     void drawHomeWeld(Ffiber *fiber);
     void delCable(Fline *line);

@@ -6,20 +6,23 @@ class Ffiber;
 class Fweld;
 class Fmodule;
 class QGraphicsTextItem;
+class FlogicFiber;
 
 class Fcable : public QGraphicsRectItem
 {
 public:
-    Fcable(int mCount, int fCount, QString str, QGraphicsItem *p);
+    Fcable(int mCount, QVector<FlogicFiber *> &indexes, QString str, QGraphicsItem *p);
     QVector<Fmodule *> modules;
     QVector<Ffiber *> fibers;
     enum { Type = UserType + 7 };
     int  type() const;
     void setAddress(QString value);
+    QString getAddress() const;
+
 private:
     QGraphicsTextItem *address;
-    int  m_Old;
-    int  m_Counter;
+    int  Old;
+    int  Counter;
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 };

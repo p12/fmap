@@ -19,12 +19,11 @@ Fdiagram::Fdiagram()
     // Address of box
     address = new QGraphicsTextItem("Street 11", this);
     address->setPos(25, 5);
-
 }
 
-void Fdiagram::addCable(int m, int f, QString s)
+void Fdiagram::addCable(int m, QVector<FlogicFiber *> &fibers, QString s)
 {
-    cables << new Fcable(m, f, s, this);
+    cables << new Fcable(m, fibers, s, this);
     resize();
 }
 

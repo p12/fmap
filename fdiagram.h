@@ -10,6 +10,7 @@ class Fcable;
 class Ffiber;
 class Fweld;
 class FhomeWeld;
+class FlogicFiber;
 
 class Fdiagram : public QGraphicsRectItem
 {
@@ -19,7 +20,7 @@ public:
     QVector<Fcable *> cables; //cables vector
     QVector<Fweld *> welds;
     QVector<FhomeWeld* > homeWelds;
-    void addCable(int m, int f, QString s);
+    void addCable(int m, QVector<FlogicFiber *> &fibers, QString s);
     void delCable(Fcable *c);
     void moveCable(Fcable *cable, bool right);
     void addWeld(Ffiber *a, Ffiber *b);

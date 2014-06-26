@@ -10,23 +10,23 @@ class FtextItem;
 class Fbox : public QGraphicsEllipseItem
 {
 public:
-    Fbox();
-    Fdiagram *diagram;
-    QVector<Fline *> lines;
+                    Fbox();
+    Fdiagram*       diagram;
+    QVector<Fline*> lines;
 
-    enum { Type = UserType + 1 };
-    QString getAddress() const;
-    FdiagramStack *getStack() const;
-    void setAddress(QString value);
-    void setStack(FdiagramStack *value);
-    int type() const;
+    enum            { Type = UserType + 1 };
+    QString         getAddress() const;
+    FdiagramStack*  getStack() const;
+    void            setAddress(QString value);
+    void            setStack(FdiagramStack *value);
+    int             type() const;
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    QVariant        itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
-    FdiagramStack *stack;
-    FtextItem *address;
+    FdiagramStack*  stack;
+    FtextItem*      address;
 };
 
 #endif // FBOX_H

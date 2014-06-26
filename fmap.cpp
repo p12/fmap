@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtGlobal>
 #include <QtSvg>
+#include <QDebug>
 
 #include "fmap.h"
 #include "fdiagram.h"
@@ -13,13 +14,13 @@
 #include "fmodule.h"
 #include "fscene.h"
 #include "fdiagramstack.h"
-
+#include "flogicfiber.h"
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
     inCreateBox = false;
     scene = new QGraphicsScene;
-//    scene = new Fscene;
+    //    scene = new Fscene;
     QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
     scene->addItem(map);
 
@@ -48,6 +49,9 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     show->addAction("Zoom in", this, SLOT(zoomIn()), QKeySequence(QKeySequence("Z")));
     show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence(QKeySequence("Ctrl+Z")));
 
+    QMenu *tools = menuBar()->addMenu(tr("&Tools"));
+    tools->addAction("Trace channel", this, SLOT(tracePath()), QKeySequence(QKeySequence("T")));
+    
     // Diagrams view setup
     diagramScene = new QGraphicsScene;
 
@@ -92,7 +96,12 @@ void FMap::createLine()
         int f = QInputDialog::getInt(this, "Input fibers count in module.", "Fibers:", 4, 1, 100, 1, &ok);
         if (!ok)
             return;
-        drawCable(box1, box2, m, f);
+        QVector<FlogicFiber *> fibers;
+        for (int i = 0; i < f * m; i++)
+            fibers << new FlogicFiber;
+
+        logicFibers << fibers;
+        drawCable(box1, box2, m, fibers);
     }
 }
 
@@ -175,6 +184,7 @@ void FMap::save()
             if (b >= 0)
                 out << a << b;
         out << l->moduleCount << l->fiberCount;
+        out << l->getPoints();
     }
 
     foreach (Fbox *b, boxes) {
@@ -226,11 +236,21 @@ void FMap::open()
     }
 
     // lines
+    QVector<QPointF> points;
     in >> count;
     for (int i = 0; i < count; i++)
     {
-        in >> a >> b >> m >> f;
-        drawCable(boxes[a], boxes[b], m, f);
+        in >> a >> b
+           >> m >> f;
+        in >> points;
+
+        QVector<FlogicFiber *> indexes;
+        for (int i = 0; i < m * f; i++)
+            indexes << new FlogicFiber;
+
+        logicFibers << indexes;
+        drawCable(boxes[a], boxes[b], m, indexes);
+        lines.last()->setPoints(points);
     }
 
     foreach (Fbox *b, boxes) {
@@ -293,7 +313,7 @@ void FMap::del()
     }
 }
 
-void FMap::zoomIn()
+void FMap::zoomIn()         
 {
     view->scale(1.25, 1.25);
 }
@@ -301,6 +321,27 @@ void FMap::zoomIn()
 void FMap::zoomOut()
 {
     view->scale(0.75, 0.75);
+}
+
+void FMap::tracePath()
+{
+    QList<QGraphicsItem*> list = diagramScene->selectedItems();
+    if (list.size() != 1)
+        return;
+    Fweld *weld = qgraphicsitem_cast<Fweld *>(list[0]);
+    if (!weld)
+        return;
+
+    foreach (QVector<FlogicFiber *> channel, channels) {
+        int pos = channel.indexOf(weld->fiber1->getLogicFiber());
+        if (pos >= 0)
+            foreach (FlogicFiber *logicFiber, channel) {
+                foreach (Fbox *box, logicFiber->boxes)
+                    box->setSelected(1);
+                foreach (Ffiber *fiber, logicFiber->fibers)
+                    fiber->setSelected(1);
+            }
+    }
 }
 
 void FMap::drawBox(QPointF point)
@@ -314,28 +355,30 @@ void FMap::drawBox(QPointF point)
     diagramScene->addItem(box->diagram);
 }
 
-void FMap::drawCable(Fbox *aBox, Fbox *bBox, int moduleCount, int fiberCount)
+void FMap::drawCable(Fbox *box1, Fbox *box2, int moduleCount, QVector<FlogicFiber *> &fibers)
 {
-    Fline *line = new Fline;
-    line->setLine(QLineF(aBox->pos(), bBox->pos()));
+    Fline *line = new Fline(box1->pos(), box2->pos());
     scene->addItem(line);
     lines << line;
 
     // ptrs to box1 and box2 in line
-    line->box1 = aBox;
-    line->box2 = bBox;
+    line->box1 = box1;
+    line->box2 = box2;
     // ptrs to line in box1 and box2
-    aBox->lines << line;
-    bBox->lines << line;
+    box1->lines << line;
+    box2->lines << line;
 
-    aBox->diagram->addCable(moduleCount, fiberCount, bBox->getAddress());
-    bBox->diagram->addCable(moduleCount, fiberCount, aBox->getAddress());
+    foreach (FlogicFiber *logicFiber, fibers)
+        logicFiber->boxes << box1 << box2;
+
+    box1->diagram->addCable(moduleCount, fibers, box2->getAddress());
+    box2->diagram->addCable(moduleCount, fibers, box1->getAddress());
 
     // ptrs to dgrmA and dgrmB cables in line
-    line->cable1 = aBox->diagram->cables.last();
-    line->cable2 = bBox->diagram->cables.last();
+    line->cable1 = box1->diagram->cables.last();
+    line->cable2 = box2->diagram->cables.last();
     line->moduleCount = moduleCount;
-    line->fiberCount = fiberCount;
+    line->fiberCount = fibers.size() / moduleCount;
 }
 
 void FMap::drawWeld(Ffiber *a, Ffiber *b)
@@ -345,6 +388,68 @@ void FMap::drawWeld(Ffiber *a, Ffiber *b)
         // both Ffibers from one Fdiagram
         if (a->parentItem()->parentItem() == b->parentItem()->parentItem())
             dgram->addWeld(a, b);
+
+    // Work with logic channels (for tracing)
+    int posA = -1;
+    int posB = -1;
+    int channelA, channelB;
+
+    // search for fibers in all channels
+    for (int i = 0; i < channels.size (); i++) {
+        int pos = channels[i].indexOf(a->getLogicFiber());
+        if (pos >= 0){
+            posA = pos;
+            channelA = i;
+        }
+        pos = channels[i].indexOf (b->getLogicFiber ());
+        if (pos >= 0){
+            posB = pos;
+            channelB = i;
+        }
+    }
+
+    // if A and B fibers not found
+    if (posB == -1 && posA == -1) {
+        QVector<FlogicFiber *> channel;
+        channel << a->getLogicFiber() << b->getLogicFiber();
+        channels << channel;
+
+    // if only A found
+    } else if (posB == -1 && posA >= 0) {
+        if (posA == 0)
+            channels[channelA].prepend(b->getLogicFiber());
+        else if (posA == channels[channelA].size() - 1)
+            channels[channelA].append(b->getLogicFiber());
+        else
+            qDebug() << posA;
+
+    // if only B found
+    } else if (posA == -1 && posB >= 0) {
+        if (posB == 0)
+            channels[channelB].prepend(a->getLogicFiber());
+        else if (posB == channels[channelB].size() - 1)
+            channels[channelB].append(a->getLogicFiber());
+        else
+            qDebug() << posB;
+
+    // if both found
+    } else if (posA == 0 && posB == channels[channelB].size() - 1) {
+        channels[channelB] << channels[channelA];
+        channels.remove (channelA);
+    } else if (posB == 0 && posA == channels[channelA].size() - 1) {
+        channels[channelA] << channels[channelB];
+        channels.remove(channelB);
+    } else if (posB == 0 && posA == 0) {
+        for (int i = 0; i < channels[channelA].size(); i++)
+            channels[channelB].prepend(channels[channelA][i]);
+        channels.remove(channelA);
+    } else if (posB == channels[channelB].size() - 1 &&
+               posA == channels[channelA].size() - 1) {
+        for (int i = channels[channelA].size() - 1; i >= 0; i--)
+            channels[channelB].prepend(channels[channelA][i]);
+        channels.remove(channelA);
+    } else
+        qDebug() << "drawWeld if both found" << posB << posA;
 }
 
 void FMap::drawHomeWeld(Ffiber *fiber)
@@ -372,6 +477,49 @@ void FMap::delWeld(Fweld *w)
 {
     Fdiagram *d = qgraphicsitem_cast<Fdiagram *>(w->parentItem());
     d->delWeld(w);
+
+    // Del from logic channel
+    int posA = -1;
+    int posB = -1;
+    int channel = -1;
+
+    // search for fibers in all channels
+    for (int i = 0; i < channels.size(); i++) {
+        int pos = channels[i].indexOf(w->fiber1->getLogicFiber());
+        if (pos >= 0){
+            posA = pos;
+            channel = i;
+        }
+        pos = channels[i].indexOf(w->fiber2->getLogicFiber());
+        if (pos >= 0){
+            posB = pos;
+            break;
+        }
+    }
+
+    if (channel == -1)
+        return;
+
+    // only 2 fibers
+    if (channels[channel].size() == 2) {
+        channels.remove(channel);
+    // fiber A is at begin or end of channel
+    } else if (posA == 0 || posA == channels[channel].size() - 1) {
+        channels[channel].remove(posA);
+    // fiber B is at begin or end
+    } else if (posB == 0 || posB == channels[channel].size() - 1) {
+        channels[channel].remove(posB);
+    // both are at middle and A is first
+    } else if (posA < posB) {
+        channels << channels[channel].mid(posB);
+        channels[channel].remove(posB, channels[channel].size() - posB);
+    // or B is first
+    } else if (posA > posB) {
+        channels << channels[channel].mid(posA);
+        channels[channel].remove(posA, channels[channel].size() - posA);
+    } else
+        qDebug() << "del Weld else overflow";
+
 }
 
 void FMap::delHomeWeld(FhomeWeld *homeWeld)

@@ -3,14 +3,14 @@
 #include <QBrush>
 #include <QVector>
 
-const QColor red("#ffa1a1"); 		// red
-const QColor green("#caddac"); 		// green
-const QColor blue("#9eb9ff"); 		// blue
-const QColor yellow("#faebc3"); 	// yellow
-const QColor brown("#dfa654"); 		// brown
-const QColor black("#6f6b66"); 		// black
-const QColor natural("#dfdedb"); 	// natural (gray)
-const QColor white("#f2f2f1");		// white
+const QColor red    ("#ffa1a1");
+const QColor green  ("#caddac");
+const QColor blue   ("#9eb9ff");
+const QColor yellow ("#faebc3");
+const QColor brown  ("#dfa654");
+const QColor black  ("#6f6b66");
+const QColor natural("#dfdedb");
+const QColor white  ("#f2f2f1");
 
 QBrush brushes[] = {
     QBrush(red),
@@ -34,4 +34,13 @@ Ffiber::Ffiber(int x, int y, int color, QGraphicsItem *p) : QGraphicsRectItem(p)
     setBrush(brushes[color]);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setPos(x, y);
+}
+FlogicFiber *Ffiber::getLogicFiber() const
+{
+    return logicFiber;
+}
+
+void Ffiber::setLogicFiber(FlogicFiber *value)
+{
+    logicFiber = value;
 }

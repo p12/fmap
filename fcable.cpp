@@ -3,10 +3,12 @@
 #include "fweld.h"
 #include "fmodule.h"
 #include "fdiagram.h"
+#include "flogicfiber.h"
 
 #include <QBrush>
 #include <QtGlobal>
 #include <QGraphicsSceneMouseEvent>
+#include <QDebug>
 
 // from ffiber.h
 extern QBrush brushes[];
@@ -22,9 +24,10 @@ const int HORIZ_FIB_MARG = 1;
 const int FIB_WIDTH =  Ffiber().rect().width();
 const int FIB_HEIGHT = Ffiber().rect().height();
 
-Fcable::Fcable(int mCount, int fCount, QString str, QGraphicsItem *p) : QGraphicsRectItem(p)
+Fcable::Fcable(int mCount, QVector<FlogicFiber *> &indexes, QString str, QGraphicsItem *p) : QGraphicsRectItem(p)
 {
-    m_Counter = 0;
+    Counter = 0;
+    int fCount = indexes.size() / mCount;
     int mWidth = FIB_WIDTH + HORIZ_FIB_MARG * 2 + 10;
     int mHeight = (FIB_HEIGHT + VERT_FIB_MARG) * fCount;
 
@@ -41,11 +44,14 @@ Fcable::Fcable(int mCount, int fCount, QString str, QGraphicsItem *p) : QGraphic
         module->setBrush(brushes[i]);
         
         // fiber create
-        for (int j = 0; j < fCount; j++ )
+        for (int j = 0; j < fCount; j++)
         {
             int xx = x + HORIZ_FIB_MARG;
             int yy = y + VERT_FIB_MARG + (FIB_HEIGHT + VERT_FIB_MARG) * j;
             fibers << new Ffiber(xx, yy, j, this);
+            fibers.last()->setLogicFiber(indexes[i * fCount + j]);
+//            qDebug() << fibers.last()->getLogicFiber();
+            indexes[i * fCount + j]->fibers << fibers.last();
         }
     }
 
@@ -67,6 +73,10 @@ int Fcable::type() const
 {
     return Type;
 }
+QString Fcable::getAddress() const
+{
+    return address->toPlainText();
+}
 
 void Fcable::setAddress(QString value)
 {
@@ -78,23 +88,23 @@ void Fcable::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     bool right = 0;
     int  direction;
 
-    switch (m_Counter) {
+    switch (Counter) {
 
     case 0 :
-        m_Old = event->pos().x();
-        m_Counter++;
+        Old = event->pos().x();
+        Counter++;
         break;
 
     // Waiting 40 events for smooth moving
     case 40 :
-        direction = event->pos().x() - m_Old;
+        direction = event->pos().x() - Old;
         right = (direction > 0) ? 1 : 0;
         qgraphicsitem_cast<Fdiagram *>(parentItem())->moveCable(this, right);
-        m_Counter = 0;
+        Counter = 0;
         break;
 
     default :
-        m_Counter++;
+        Counter++;
         break;
     }
 

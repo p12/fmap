@@ -2,6 +2,7 @@
 #define FFIBER_H
 
 #include <QGraphicsRectItem>
+class FlogicFiber;
 
 class Ffiber : public QGraphicsRectItem
 {
@@ -13,6 +14,12 @@ public:
         {
             return Type;
         }
+
+    FlogicFiber *getLogicFiber() const;
+    void setLogicFiber(FlogicFiber *value);
+
+private:
+    FlogicFiber *logicFiber;
 };
 
 #endif // FFIBER_H
