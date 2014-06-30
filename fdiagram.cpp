@@ -3,6 +3,7 @@
 #include "ffiber.h"
 #include "fweld.h"
 #include "fhomeweld.h"
+#include "fmap.h"
 
 #include <QtGui>
 #include <QtGlobal>
@@ -108,6 +109,8 @@ void Fdiagram::delWeld(Fweld *w)
 {
     w->fiber1->setWelded(0);
     w->fiber2->setWelded(0);
+    map->delLogicWeld(w);
+
     int i = welds.indexOf(w);
     if (i >= 0)
         welds.remove(i);
@@ -210,10 +213,19 @@ void Fdiagram::drawHomeWeld(FhomeWeld *homeWeld)
 
     homeWeld->setPos(point);
 }
+FMap *Fdiagram::getMap() const
+{
+    return map;
+}
+
+void Fdiagram::setMap(FMap *value)
+{
+    map = value;
+}
 
 QString Fdiagram::getAddress() const
 {
-  return address->toPlainText();
+    return address->toPlainText();
 }
 
 void Fdiagram::setAddress(QString value)

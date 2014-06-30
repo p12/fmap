@@ -23,6 +23,7 @@ class FMap : public QMainWindow
 
 public:
     FMap(QWidget* parent = 0);
+    void delLogicWeld(Fweld *w);
 
 public slots:
     void createBox();

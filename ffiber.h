@@ -19,7 +19,7 @@ public:
 
 private:
     FlogicFiber *logicFiber;
-    bool        isWelded;
+    bool        welded;
 };
 
 #endif // FFIBER_H

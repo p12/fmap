@@ -14,6 +14,8 @@ void FdiagramStack::push(Fdiagram *diagram)
 void FdiagramStack::pop(Fdiagram *diagram)
 {
   int pos = diagrams.indexOf(diagram);
+  if (pos < 0)
+      return;
   current = diagrams[pos]->pos();
   diagrams[pos]->hide();
   diagrams.remove(pos);

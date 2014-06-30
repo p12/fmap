@@ -17,6 +17,7 @@ public:
     enum            { Type = UserType + 1 };
     QString         getAddress() const;
     FdiagramStack*  getStack() const;
+    void            deleteLine(Fline *line);
     void            setAddress(QString value);
     void            setStack(FdiagramStack *value);
     int             type() const;

@@ -11,6 +11,7 @@ class Ffiber;
 class Fweld;
 class FhomeWeld;
 class FlogicFiber;
+class FMap;
 
 class Fdiagram : public QGraphicsRectItem
 {
@@ -33,6 +34,8 @@ public:
     void setAddress(QString value);
     QMap<QString, int> getOrder() const;
     void setOrder(QMap<QString, int> &orderMap);
+    FMap *getMap() const;
+    void setMap(FMap *value);
 
 protected:
     void resize();
@@ -42,6 +45,7 @@ protected:
 private:
     QGraphicsTextItem *address;
     QPointF oldPos;
+    FMap    *map;
 };
 
 #endif // FDIAGRAM_H

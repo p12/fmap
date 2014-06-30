@@ -34,6 +34,7 @@ Ffiber::Ffiber(int x, int y, int color, QGraphicsItem *p) : QGraphicsRectItem(p)
     setBrush(brushes[color]);
     setFlag(QGraphicsItem::ItemIsSelectable);
     setPos(x, y);
+    welded = 0;
 }
 FlogicFiber *Ffiber::getLogicFiber() const
 {
@@ -46,11 +47,11 @@ void Ffiber::setLogicFiber(FlogicFiber *value)
 }
 bool Ffiber::isWelded() const
 {
-    return isWelded;
+    return welded;
 }
 
 void Ffiber::setWelded(bool value)
 {
-    isWelded = value;
+    welded = value;
 }
 

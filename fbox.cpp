@@ -145,6 +145,13 @@ FdiagramStack *Fbox::getStack() const
     return stack;
 }
 
+void Fbox::deleteLine(Fline *line)
+{
+    int pos = lines.indexOf(line);
+    if (pos >= 0)
+        lines.remove(pos);
+}
+
 void Fbox::setStack(FdiagramStack *value)
 {
     stack = value;
