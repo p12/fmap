@@ -31,6 +31,8 @@ public:
     int type() const;
     QString getAddress() const;
     void setAddress(QString value);
+    QMap<QString, int> getOrder() const;
+    void setOrder(QMap<QString, int> &orderMap);
 
 protected:
     void resize();

@@ -27,6 +27,7 @@ protected:
 private:
     FdiagramStack*  stack;
     FtextItem*      address;
+    static int      nextColor;
 };
 
 #endif // FBOX_H

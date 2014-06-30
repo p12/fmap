@@ -187,6 +187,11 @@ void FMap::save()
         out << l->getPoints();
     }
 
+    // cables order in boxes
+    foreach (Fbox *box, boxes) {
+        out << box->diagram->getOrder();
+    }
+
     foreach (Fbox *b, boxes) {
         //welds
         out << b->diagram->welds.size();
@@ -251,6 +256,13 @@ void FMap::open()
         logicFibers << indexes;
         drawCable(boxes[a], boxes[b], m, indexes);
         lines.last()->setPoints(points);
+    }
+
+    // cables order in diagrams
+    QMap<QString, int> order;
+    foreach (Fbox *box, boxes) {
+        in >> order;
+        box->diagram->setOrder(order);
     }
 
     foreach (Fbox *b, boxes) {
@@ -332,6 +344,8 @@ void FMap::tracePath()
     if (!weld)
         return;
 
+    stack->clear();
+
     foreach (QVector<FlogicFiber *> channel, channels) {
         int pos = channel.indexOf(weld->fiber1->getLogicFiber());
         if (pos >= 0)
@@ -383,6 +397,12 @@ void FMap::drawCable(Fbox *box1, Fbox *box2, int moduleCount, QVector<FlogicFibe
 
 void FMap::drawWeld(Ffiber *a, Ffiber *b)
 {
+    if (a->isWelded() || b->isWelded())
+        return;
+    
+    a->setWelded(1);
+    b->setWelded(1);
+    
     Fdiagram *dgram = qgraphicsitem_cast<Fdiagram *>(a->parentItem()->parentItem());
     if (dgram)
         // both Ffibers from one Fdiagram
@@ -454,6 +474,10 @@ void FMap::drawWeld(Ffiber *a, Ffiber *b)
 
 void FMap::drawHomeWeld(Ffiber *fiber)
 {
+    if (fiber->isWelded())
+        return;
+    
+    fiber->setWelded(1);
     Fdiagram *dgram  = qgraphicsitem_cast<Fdiagram *>(fiber->parentItem()->parentItem());
     if (dgram)
         dgram->addHomeWeld(fiber);

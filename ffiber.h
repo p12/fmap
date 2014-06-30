@@ -10,16 +10,16 @@ public:
     Ffiber();
     Ffiber(int x, int y, int color, QGraphicsItem *p);
     enum { Type = UserType + 3 };
-    int type() const
-        {
-            return Type;
-        }
-
+    
     FlogicFiber *getLogicFiber() const;
+    bool isWelded() const;
     void setLogicFiber(FlogicFiber *value);
+    void setWelded(bool value);
+    int  type() const { return Type; }
 
 private:
     FlogicFiber *logicFiber;
+    bool        isWelded;
 };
 
 #endif // FFIBER_H

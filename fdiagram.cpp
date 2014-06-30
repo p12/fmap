@@ -106,6 +106,8 @@ void Fdiagram::addHomeWeld(Ffiber *fiber)
 
 void Fdiagram::delWeld(Fweld *w)
 {
+    w->fiber1->setWelded(0);
+    w->fiber2->setWelded(0);
     int i = welds.indexOf(w);
     if (i >= 0)
         welds.remove(i);
@@ -114,6 +116,7 @@ void Fdiagram::delWeld(Fweld *w)
 
 void Fdiagram::delHomeWeld(FhomeWeld *homeWeld)
 {
+    homeWeld->fiber->setWelded(0);
     int pos = homeWelds.indexOf(homeWeld);
     if (pos >= 0)
         homeWelds.remove(pos);
@@ -215,6 +218,27 @@ QString Fdiagram::getAddress() const
 
 void Fdiagram::setAddress(QString value)
 {
-  address->setPlainText(value);
+    address->setPlainText(value);
+}
+
+QMap<QString, int> Fdiagram::getOrder() const
+{
+    QMap<QString, int> order;
+    int i = 0;
+    foreach (Fcable *cable, cables) {
+        order.insert(cable->getAddress(), i++);
+    }
+    return order;
+}
+
+void Fdiagram::setOrder(QMap<QString, int> &orderMap)
+{
+    QVector<Fcable *> newOrder(cables.size());
+    foreach (Fcable *cable, cables) {
+        int i = orderMap.value(cable->getAddress());
+        newOrder[i] = cable;
+    }
+    cables = newOrder;
+    resize();
 }
 

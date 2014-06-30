@@ -12,6 +12,7 @@ class FdiagramStack
 public:
   void push(Fdiagram *diagram);
   void pop (Fdiagram *diagram);
+  void clear();
 
 private:
   QVector<Fdiagram *> diagrams;

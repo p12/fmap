@@ -12,15 +12,69 @@
 #include <QtGlobal>
 
 const QColor colors[] = {
-("#ffa1a1"),
-("#caddac"),
-("#9eb9ff"),
-("#faebc3"),
-("#dfa654"),
-("#6f6b66"),
-("#dfdedb"),
-("#f2f2f1"),
+    ("#ffa1a1"),  // red
+    ("#ffd6a1"),  // green
+    ("#faebc3"),  // blue
+    ("#fff3a1"),  // yellow
+    ("#dfffa1"),  // brown
+    ("#caddac"),  // gray
+    ("#acffa1"),  // lightblue
+    ("#a1ffc2"),  // redblue
+    ("#a1ffea"),  // darkyellow
+    ("#a1e1ff"),  // darkbrown
+    ("#9eb9ff"),  // lightred
+    ("#a1aaff"),  // red
+    ("#b5a1ff"),  // green
+    ("#e1a1ff"),  // blue
+    ("#ffa1ee"),  // yellow
+    ("#ddacac"),  // brown
+    ("#b2ddac"),  // gray
+    ("#acddd4"),  // lightblue
+    ("#cfacdd"),  // redblue
+
+    ("#ffa1a1"),  // red
+    ("#ffd6a1"),  // green
+    ("#faebc3"),  // blue
+    ("#fff3a1"),  // yellow
+    ("#dfffa1"),  // brown
+    ("#caddac"),  // gray
+    ("#acffa1"),  // lightblue
+    ("#a1ffc2"),  // redblue
+    ("#a1ffea"),  // darkyellow
+    ("#a1e1ff"),  // darkbrown
+    ("#9eb9ff"),  // lightred
+    ("#a1aaff"),  // red
+    ("#b5a1ff"),  // green
+    ("#e1a1ff"),  // blue
+    ("#ffa1ee"),  // yellow
+    ("#ddacac"),  // brown
+    ("#b2ddac"),  // gray
+    ("#acddd4"),  // lightblue
+    ("#cfacdd"),  // redblue
+
+    ("#ffa1a1"),  // red
+    ("#ffd6a1"),  // green
+    ("#faebc3"),  // blue
+    ("#fff3a1"),  // yellow
+    ("#dfffa1"),  // brown
+    ("#caddac"),  // gray
+    ("#acffa1"),  // lightblue
+    ("#a1ffc2"),  // redblue
+    ("#a1ffea"),  // darkyellow
+    ("#a1e1ff"),  // darkbrown
+    ("#9eb9ff"),  // lightred
+    ("#a1aaff"),  // red
+    ("#b5a1ff"),  // green
+    ("#e1a1ff"),  // blue
+    ("#ffa1ee"),  // yellow
+    ("#ddacac"),  // brown
+    ("#b2ddac"),  // gray
+    ("#acddd4"),  // lightblue
+    ("#cfacdd"),  // redblue
+
 };
+
+int Fbox::nextColor = 0;
 
 Fbox::Fbox()
 {
@@ -46,18 +100,22 @@ QVariant Fbox::itemChange(QGraphicsItem::GraphicsItemChange change, const QVaria
         {
             stack->push(diagram);
             pen.setWidth(4);
-            for (int i = 0; i < lines.size(); i++)
-            {
-                pen.setColor(colors[i]);
-                lines[i]->setPen(pen);
-                diagram->cables[i]->setBrush(colors[i]);
+            foreach (Fline *line, lines) {
+                pen.setColor(colors[nextColor]);
+                line->setPen(pen);
+                line->cable1->setBrush(colors[nextColor]);
+                line->cable2->setBrush(colors[nextColor++]);
             }
+            if (nextColor >= 40)
+                nextColor = 0;
         }
         else
         {
             stack->pop(diagram);
             foreach (Fline* l, lines)
                 l->setPen(pen);
+            if (scene()->selectedItems().size() == 0)
+                nextColor = 0;
         }
     }
 

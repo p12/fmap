@@ -44,3 +44,13 @@ void Ffiber::setLogicFiber(FlogicFiber *value)
 {
     logicFiber = value;
 }
+bool Ffiber::isWelded() const
+{
+    return isWelded;
+}
+
+void Ffiber::setWelded(bool value)
+{
+    isWelded = value;
+}
+

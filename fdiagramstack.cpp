@@ -21,6 +21,15 @@ void FdiagramStack::pop(Fdiagram *diagram)
   for (int i = pos; i < diagrams.size(); i++) {
       diagrams[i]->setPos(current);
       current.ry() += diagrams[i]->rect().height() + 25;
+  }
+}
+
+void FdiagramStack::clear()
+{
+    foreach (Fdiagram *diagram, diagrams) {
+        diagram->hide();
     }
+    diagrams.clear();
+    current = QPointF(0, 0);
 }
 
