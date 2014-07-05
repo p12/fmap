@@ -1,4 +1,5 @@
 #include "fline.h"
+#include "ftextitem.h"
 #include <QPen>
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
@@ -6,6 +7,12 @@
 Fline::Fline(QPointF p1, QPointF p2) :
     begin(p1), end(p2)
 {
+    lengthText = new FtextItem(this);
+    lengthText->setPlainText("0");
+    lengthText->setDefaultTextColor(Qt::darkGray);
+    lengthText->hide();
+    connect(lengthText, SIGNAL(textChanged()), SLOT(updateLength()));
+
     points << p1 << p2;
     ellipses << new QGraphicsEllipseItem
              << new QGraphicsEllipseItem;
@@ -61,6 +68,33 @@ void Fline::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             break;
         }
 }
+
+QVariant Fline::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemSelectedChange){
+        lengthText->setVisible(value.toBool());
+    }
+
+    return QGraphicsItem::itemChange(change, value);
+}
+
+uint Fline::getLength() const
+{
+    return lengthText->toPlainText().toUInt();
+}
+
+void Fline::setLength(uint value)
+{
+    lengthText->setPlainText(QString::number(value));
+}
+
+void Fline::updateLength()
+{
+    uint length = lengthText->toPlainText().toUInt();
+    lengthText->setPlainText(QString::number(length));
+}
+
+
 QVector<QPointF> Fline::getPoints() const
 {
     return points;
@@ -97,4 +131,8 @@ void Fline::redraw()
     for (int i = 1; i < points.size(); i++)
         path.lineTo(points[i]);
     setPath(path);
+
+    QPointF p = path.boundingRect().center();
+    QPointF l = lengthText->boundingRect().center();
+    lengthText->setPos(p - l);
 }

@@ -79,14 +79,32 @@ int Fbox::nextColor = 0;
 Fbox::Fbox()
 {
     setFlags(QGraphicsItem::ItemIsSelectable);
+    setBrush(Qt::white);
+    setZValue(10);
     setRect(-15, -15, 30, 30);
     diagram = new Fdiagram;
     address = new FtextItem(this);
+    address->setY(35);
+    address->setPlainText("Street 12");
+    connect(address, SIGNAL(textChanged()), SLOT(updateAddress()));
 }
 
 int Fbox::type() const
 {
     return Type;
+}
+
+void Fbox::updateAddress()
+{
+    QString value = address->toPlainText();
+    diagram->setAddress(value);
+    foreach (Fline *line, lines) {
+        if (line->box1 == this)
+            line->cable2->setAddress(value);
+        else if (line->box2 == this) {
+            line->cable1->setAddress(value);
+        }
+    }
 }
 
 QVariant Fbox::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)

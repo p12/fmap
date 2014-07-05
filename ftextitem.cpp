@@ -1,28 +1,50 @@
 #include "ftextitem.h"
-#include "fbox.h"
+#include <QKeyEvent>
+#include <QPainter>
 
-FtextItem::FtextItem(Fbox *value)
+FtextItem::FtextItem(QGraphicsItem *parent)
 {
-    box = value;
-    setParentItem(value);
-    setPlainText("Street 11");
+    setParentItem(parent);
+}
+
+void FtextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o, QWidget *w)
+{
+    painter->setBrush(Qt::white);
+    painter->drawRect(boundingRect());
+    QGraphicsTextItem::paint(painter, o, w);
+}
+
+void FtextItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
     setTextInteractionFlags(Qt::TextEditorInteraction);
-    setY(35);
 }
 
 void FtextItem::focusOutEvent(QFocusEvent *event)
 {
-    box->setAddress(toPlainText());
+    setTextInteractionFlags(Qt::NoTextInteraction);
+    emit textChanged();
     QGraphicsTextItem::focusOutEvent(event);
 }
 
-Fbox *FtextItem::getBox() const
+void FtextItem::keyPressEvent(QKeyEvent *event)
 {
-    return box;
+    if (event->key() == Qt::Key_Return)
+    {
+        event->accept();
+        setEnabled(0);
+        setEnabled(1);
+        emit textChanged();
+    }
+    else
+        QGraphicsTextItem::keyPressEvent(event);
 }
 
-void FtextItem::setBox(Fbox *value)
+QVariant FtextItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
-    box = value;
+    if (change == ItemVisibleChange){
+        setEnabled(0);
+        setEnabled(1);
+        emit textChanged();
+    }
+    return QGraphicsItem::itemChange(change, value);
 }
-

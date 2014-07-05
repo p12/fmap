@@ -230,6 +230,7 @@ void FMap::save()
                 out << a << b;
         out << l->moduleCount << l->fiberCount;
         out << l->getPoints();
+        out << l->getLength();
     }
     
     // cables order in boxes
@@ -287,12 +288,14 @@ void FMap::open()
     
     // lines
     QVector<QPointF> points;
+    uint length;
     in >> count;
     for (int i = 0; i < count; i++)
     {
         in >> a >> b
            >> m >> f;
         in >> points;
+        in >> length;
         
         QVector<FlogicFiber *> indexes;
         for (int i = 0; i < m * f; i++)
@@ -301,6 +304,7 @@ void FMap::open()
         logicFibers << indexes;
         drawCable(boxes[a], boxes[b], m, indexes);
         lines.last()->setPoints(points);
+        lines.last()->setLength(length);
     }
     
     // cables order in diagrams

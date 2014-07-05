@@ -3,19 +3,20 @@
 
 #include <QGraphicsTextItem>
 
-class Fbox;
-
 class FtextItem : public QGraphicsTextItem
 {
+    Q_OBJECT
 public:
-    FtextItem(Fbox *value);
-    Fbox *getBox() const;
-    void setBox(Fbox *value);
+    FtextItem(QGraphicsItem *parent);
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *o, QWidget *w);
+signals:
+    void textChanged();
 
 protected:
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void focusOutEvent(QFocusEvent *event);
-private:
-    Fbox *box;
+    void keyPressEvent(QKeyEvent *event);
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 };
 
 #endif // FTEXTITEM_H

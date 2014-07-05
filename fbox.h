@@ -2,13 +2,15 @@
 #define FBOX_H
 
 #include <QGraphicsEllipseItem>
+#include <QObject>
 class Fdiagram;
 class Fline;
 class FdiagramStack;
 class FtextItem;
 
-class Fbox : public QGraphicsEllipseItem
+class Fbox : public QObject, public QGraphicsEllipseItem
 {
+    Q_OBJECT
 public:
                     Fbox();
     Fdiagram*       diagram;
@@ -21,6 +23,9 @@ public:
     void            setAddress(QString value);
     void            setStack(FdiagramStack *value);
     int             type() const;
+
+public slots:
+    void            updateAddress();
 
 protected:
     QVariant        itemChange(GraphicsItemChange change, const QVariant &value);
