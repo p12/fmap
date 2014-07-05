@@ -14,6 +14,9 @@ public:
   void pop (Fdiagram *diagram);
   void clear();
 
+  QVector<Fdiagram *> getDiagrams() const;
+  void setDiagrams(const QVector<Fdiagram *> &value);
+
 private:
   QVector<Fdiagram *> diagrams;
   QPointF current;

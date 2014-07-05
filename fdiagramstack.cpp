@@ -34,4 +34,14 @@ void FdiagramStack::clear()
     diagrams.clear();
     current = QPointF(0, 0);
 }
+QVector<Fdiagram *> FdiagramStack::getDiagrams() const
+{
+    return diagrams;
+}
+
+void FdiagramStack::setDiagrams(const QVector<Fdiagram *> &value)
+{
+    diagrams = value;
+}
+
 

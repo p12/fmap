@@ -8,11 +8,12 @@ FhomeWeld::FhomeWeld()
 
     QPen pen;
     pen.setWidth(2);
-    pen.setColor(Qt::gray);
+    pen.setColor(Qt::darkGray);
     setPen(pen);
 
     QPainterPath path;
     path.lineTo(20, 0);
-    path.lineTo(20, 80);
+    path.addEllipse(20, -6, 12, 12);
+//    path.lineTo(20, 80);
     setPath(path);
 }

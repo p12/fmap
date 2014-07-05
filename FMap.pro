@@ -39,4 +39,5 @@ HEADERS  += fmap.h \
     fscene.h \
     fdiagramstack.h \
     ftextitem.h \
-    flogicfiber.h
+    flogicfiber.h \
+    fcolors.h

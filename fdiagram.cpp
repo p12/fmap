@@ -223,6 +223,20 @@ void Fdiagram::setMap(FMap *value)
     map = value;
 }
 
+void Fdiagram::toPrint()
+{
+    foreach (Fcable *cable, cables) {
+        cable->toPrint();
+    }
+}
+
+void Fdiagram::toView()
+{
+    foreach (Fcable *cable, cables) {
+        cable->toView();
+    }
+}
+
 QString Fdiagram::getAddress() const
 {
     return address->toPlainText();

@@ -36,6 +36,7 @@ public slots:
     void zoomIn();
     void zoomOut();
     void tracePath();
+    void print();
 
 private:
 //    Fscene *scene;

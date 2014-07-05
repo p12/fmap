@@ -2,6 +2,7 @@
 #define FCABLE_H
 
 #include <QGraphicsRectItem>
+#include <QBrush>
 class Ffiber;
 class Fweld;
 class Fmodule;
@@ -18,11 +19,14 @@ public:
     int  type() const;
     void setAddress(QString value);
     QString getAddress() const;
+    void toPrint();
+    void toView();
 
 private:
     QGraphicsTextItem *address;
-    int  Old;
-    int  Counter;
+    int     Old;
+    int     Counter;
+    QBrush  oldBrush;
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 };

@@ -36,6 +36,8 @@ public:
     void setOrder(QMap<QString, int> &orderMap);
     FMap *getMap() const;
     void setMap(FMap *value);
+    void toPrint();
+    void toView();
 
 protected:
     void resize();

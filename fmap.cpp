@@ -34,6 +34,7 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     QMenu *file = menuBar()->addMenu(tr("&File"));
     file->addAction("Save", this, SLOT(save()), QKeySequence("Ctrl+S"));
     file->addAction("Open", this, SLOT(open()), QKeySequence("Ctrl+O"));
+    file->addAction("Print", this, SLOT(print()), QKeySequence("Ctrl+P"));
     file->addAction("Quit", this, SLOT(close()), QKeySequence("Ctrl+Q"));
     
     QMenu *add = menuBar()->addMenu(tr("&Items"));
@@ -404,6 +405,25 @@ void FMap::tracePath()
                 foreach (Ffiber *fiber, logicFiber->fibers)
                     fiber->setSelected(1);
             }
+    }
+}
+
+void FMap::print()
+{
+    // setup diagrams for printing
+    foreach (Fdiagram *diagram, stack->getDiagrams()) {
+        diagram->toPrint();
+    }
+
+    QPrinter printer;
+    if (QPrintDialog(&printer).exec() == QDialog::Accepted) {
+        QPainter painter(&printer);
+        painter.setRenderHint(QPainter::Antialiasing);
+        diagramView->render(&painter);
+    }
+    // undo printing setup
+    foreach (Fdiagram *diagram, stack->getDiagrams()) {
+        diagram->toView();
     }
 }
 

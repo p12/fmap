@@ -14,7 +14,7 @@ void FtextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *o, QWid
     QGraphicsTextItem::paint(painter, o, w);
 }
 
-void FtextItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void FtextItem::hoverEnterEvent(QGraphicsSceneHoverEvent */*event*/)
 {
     setTextInteractionFlags(Qt::TextEditorInteraction);
 }
