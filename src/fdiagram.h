@@ -3,6 +3,7 @@
 
 #include <QGraphicsRectItem>
 #include <QVector>
+#include <QObject>
 
 class QGraphicsTextItem;
 class Fline;
@@ -12,15 +13,17 @@ class Fweld;
 class FhomeWeld;
 class FlogicFiber;
 class FMap;
+class QComboBox;
+class QGraphicsProxyWidget;
 
-class Fdiagram : public QGraphicsRectItem
+class Fdiagram : public QObject, public QGraphicsRectItem
 {
+    Q_OBJECT
 public:
     Fdiagram();
-
-    QVector<Fcable *> cables; //cables vector
-    QVector<Fweld *> welds;
-    QVector<FhomeWeld* > homeWelds;
+    QVector<Fcable *>    cables;
+    QVector<Fweld *>     welds;
+    QVector<FhomeWeld *> homeWelds;
     void addCable(int m, QVector<FlogicFiber *> &fibers, QString s);
     void delCable(Fcable *c);
     void moveCable(Fcable *cable, bool right);
@@ -29,15 +32,22 @@ public:
     void delWeld(Fweld *w);
     void delHomeWeld(FhomeWeld *homeWeld);
     enum { Type = UserType + 4 };
-    int type() const;
-    QString getAddress() const;
-    void setAddress(QString value);
+    void setAddress(QString s, QString b);
     QMap<QString, int> getOrder() const;
-    void setOrder(QMap<QString, int> &orderMap);
     FMap *getMap() const;
+    QString getStreet() const;
+    QString getBuild() const;
+    void setBuild(QString s);
+    void setStreet(QString s);
+    void setOrder(QMap<QString, int> &orderMap);
     void setMap(FMap *value);
     void toPrint();
     void toView();
+    int  type() const;
+signals:
+    void addressChanged(QString s);
+public slots:
+    void prepareAddressChange(int i);
 
 protected:
     void resize();
@@ -48,6 +58,9 @@ private:
     QGraphicsTextItem *address;
     QPointF oldPos;
     FMap    *map;
+    QComboBox*      streetCombo;
+    QComboBox*      buildCombo;
+    QGraphicsProxyWidget* addressProxy;
 };
 
 #endif // FDIAGRAM_H

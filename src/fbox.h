@@ -6,7 +6,7 @@
 class Fdiagram;
 class Fline;
 class FdiagramStack;
-class FtextItem;
+class QGraphicsTextItem;
 
 class Fbox : public QObject, public QGraphicsEllipseItem
 {
@@ -18,21 +18,25 @@ public:
 
     enum            { Type = UserType + 1 };
     QString         getAddress() const;
+    QString         getBuild() const;
+    QVector<Fline*> getLines() const;
+    QString         getStreet() const;
     FdiagramStack*  getStack() const;
+    void            addLine(Fline *line);
     void            deleteLine(Fline *line);
-    void            setAddress(QString value);
+    void            setAddress(QString b, QString s);
     void            setStack(FdiagramStack *value);
     int             type() const;
 
 public slots:
-    void            updateAddress();
+    void            updateAddress(QString s);
 
 protected:
     QVariant        itemChange(GraphicsItemChange change, const QVariant &value);
 
 private:
     FdiagramStack*  stack;
-    FtextItem*      address;
+    QGraphicsTextItem* address;
     static int      nextColor;
 };
 

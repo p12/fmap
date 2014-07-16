@@ -218,7 +218,9 @@ void FMap::save()
     out << boxes.size();
     foreach (Fbox *box, boxes) {
         out << box->pos()
-            << box->getAddress();
+            << box->getAddress()
+            << box->getStreet()
+            << box->getBuild();
     }
     
     // lines
@@ -275,16 +277,17 @@ void FMap::open()
     
     int a, b, m, f, c1, c2, f1, f2, count = 0;
     QPointF p;
-    QString str;
+    QString str, build, street;
     
     // Reading
     // boxes
     in >> count;
     for (int i = 0; i < count; i++)
     {
-        in >> p >> str;
+        in >> p >> str
+           >> street >> build;
         drawBox(p);
-        boxes.last()->setAddress(str);
+        boxes.last()->setAddress(build, street);
     }
     
     // lines

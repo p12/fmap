@@ -6,7 +6,6 @@
 #include "fmap.h"
 
 #include <QtGui>
-#include <QtGlobal>
 
 const int MRGN = 25;
 const int WMIN = 150;
@@ -18,8 +17,39 @@ Fdiagram::Fdiagram()
     setBrush(Qt::white);
 
     // Address of box
-    address = new QGraphicsTextItem("Street 11", this);
-    address->setPos(25, 5);
+    QWidget *w = new QWidget;
+    QHBoxLayout *l = new QHBoxLayout;
+    l->setContentsMargins(0, 0, 0, 0);
+
+    streetCombo = new QComboBox;
+
+    streetCombo->addItem(QObject::trUtf8("Московская"));
+    streetCombo->addItem(QObject::trUtf8("Социалистическая"));
+    streetCombo->addItem(QObject::trUtf8("Калинина"));
+    streetCombo->addItem(QObject::trUtf8("Пионерская"));
+    streetCombo->addItem(QObject::trUtf8("Чичерина"));
+    streetCombo->addItem(QObject::trUtf8("Чичерина пер."));
+    streetCombo->addItem(QObject::trUtf8("Кооперативная"));
+    streetCombo->addItem(QObject::trUtf8("Тельмана"));
+    connect(streetCombo, SIGNAL(currentIndexChanged(int)), SLOT(prepareAddressChange(int)));
+
+    buildCombo = new QComboBox;
+    buildCombo->addItem("1");
+    buildCombo->addItem("2");
+    buildCombo->addItem("9");
+    buildCombo->addItem("12");
+    buildCombo->addItem("12/1");
+    buildCombo->addItem("18/1");
+    connect(buildCombo, SIGNAL(currentIndexChanged(int)), SLOT(prepareAddressChange(int)));
+
+    l->addWidget(streetCombo);
+    l->addWidget(buildCombo);
+    w->setLayout(l);
+
+    addressProxy = new QGraphicsProxyWidget(this);
+    addressProxy->setWidget(w);
+    addressProxy->setPos(MRGN, 40);
+    addressProxy->setZValue(10);
 }
 
 void Fdiagram::addCable(int m, QVector<FlogicFiber *> &fibers, QString s)
@@ -131,6 +161,12 @@ int Fdiagram::type() const
     return Type;
 }
 
+void Fdiagram::prepareAddressChange(int /*i*/)
+{
+    emit addressChanged(streetCombo->currentText() + " " + 
+                        buildCombo->currentText());
+}
+
 void Fdiagram::resize()
 {
     // set position per cable count
@@ -175,7 +211,7 @@ void Fdiagram::resize()
         drawHomeWeld(homeWeld);
 
     // check Fdiagram size
-    qreal width = 100.0;
+    qreal width = addressProxy->rect().width() + MRGN * 2;
     qreal height = 150.0;
 
     foreach (Fcable *cable, cables) {
@@ -218,6 +254,30 @@ FMap *Fdiagram::getMap() const
     return map;
 }
 
+QString Fdiagram::getStreet() const
+{
+    return streetCombo->currentText();
+}
+
+QString Fdiagram::getBuild() const
+{
+    return buildCombo->currentText();
+}
+
+void Fdiagram::setBuild(QString s)
+{
+    int pos = buildCombo->findText(s);
+    if (pos >= 0)
+        buildCombo->setCurrentIndex(pos);
+}
+
+void Fdiagram::setStreet(QString s)
+{
+    int pos = streetCombo->findText(s);
+    if (pos >= 0)
+        streetCombo->setCurrentIndex(pos);
+}
+
 void Fdiagram::setMap(FMap *value)
 {
     map = value;
@@ -237,14 +297,23 @@ void Fdiagram::toView()
     }
 }
 
-QString Fdiagram::getAddress() const
+void Fdiagram::setAddress(QString s, QString b)
 {
-    return address->toPlainText();
-}
+    int pos = streetCombo->findText(s);
+    if (pos >= 0)
+        streetCombo->setCurrentIndex(pos);
+    else {
+        streetCombo->addItem(s);
+        streetCombo->setCurrentIndex(streetCombo->count() - 1);
+    }
 
-void Fdiagram::setAddress(QString value)
-{
-    address->setPlainText(value);
+    pos = buildCombo->findText(b);
+    if (pos >= 0)
+        buildCombo->setCurrentIndex(pos);
+    else {
+        buildCombo->addItem(b);
+        buildCombo->setCurrentIndex(buildCombo->count() - 1);
+    }
 }
 
 QMap<QString, int> Fdiagram::getOrder() const

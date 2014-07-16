@@ -14,6 +14,5 @@ FhomeWeld::FhomeWeld()
     QPainterPath path;
     path.lineTo(20, 0);
     path.addEllipse(20, -6, 12, 12);
-//    path.lineTo(20, 80);
     setPath(path);
 }
