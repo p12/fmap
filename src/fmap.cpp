@@ -210,7 +210,8 @@ void FMap::createHomeWeld()
 
 void FMap::save()
 {
-    QFile file("map-file.dat");
+    QString fileName = QFileDialog::getOpenFileName(this, "Select File", "/home");
+    QFile file(fileName);
     file.open(QIODevice::WriteOnly);
     QDataStream out(&file);
     
@@ -273,7 +274,8 @@ void FMap::save()
 
 void FMap::open()
 {
-    QFile file("map-file.dat");
+    QString fileName = QFileDialog::getOpenFileName(this, "Select File", "/home");
+    QFile file(fileName);
     file.open(QIODevice::ReadOnly);
     QDataStream in(&file);
     
