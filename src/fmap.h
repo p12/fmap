@@ -16,7 +16,6 @@ class Fscene;
 class FdiagramStack;
 class FlogicFiber;
 
-
 class FMap : public QMainWindow
 {
     Q_OBJECT

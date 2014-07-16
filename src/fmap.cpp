@@ -70,6 +70,7 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     QWidget *widget = new QWidget;
     widget->setLayout(hLayout);
     setCentralWidget(widget);
+
 }
 
 void FMap::delLogicWeld(Fweld *w)
@@ -267,6 +268,7 @@ void FMap::save()
             }
         }
     }
+    statusBar()->showMessage("Saved.", 4000);
 }
 
 void FMap::open()
