@@ -15,6 +15,7 @@ class FhomeWeld;
 class Fscene;
 class FdiagramStack;
 class FlogicFiber;
+class Fview;
 
 class FMap : public QMainWindow
 {
@@ -36,12 +37,15 @@ public slots:
     void zoomOut();
     void tracePath();
     void print();
+    void importBackground();
 
 private:
 //    Fscene *scene;
     QGraphicsScene *diagramScene, *scene;
     FdiagramStack *stack;
-    QGraphicsView *view, *diagramView;
+    Fview *view;
+//    QGraphicsView *view;
+    QGraphicsView *diagramView;
     bool inCreateBox;
     QVector<Fbox *> boxes;
     QVector<Fline *> lines;

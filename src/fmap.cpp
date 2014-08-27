@@ -15,19 +15,20 @@
 #include "fscene.h"
 #include "fdiagramstack.h"
 #include "flogicfiber.h"
+#include "fview.h"
 
 FMap::FMap(QWidget *parent): QMainWindow(parent)
 {
     inCreateBox = false;
     scene = new QGraphicsScene;
-    //    scene = new Fscene;
-    QGraphicsSvgItem *map = new QGraphicsSvgItem("/home/pak/projects/FMap/map.svg");
-    scene->addItem(map);
-    
-    view = new QGraphicsView(scene);
+//    view = new QGraphicsView(scene);
+    view = new Fview;
+    view->setScene(scene);
     view->setRenderHints(QPainter::Antialiasing);
     view->show();
     
+    importBackground();
+
     stack = new FdiagramStack;
     
     // Create menus
@@ -46,12 +47,12 @@ FMap::FMap(QWidget *parent): QMainWindow(parent)
     QMenu *edit = menuBar()->addMenu(tr("&Edit"));
     edit->addAction("Delete", this, SLOT(del()), QKeySequence("Del"));
     
-    QMenu *show = menuBar()->addMenu(tr("&View"));
-    show->addAction("Zoom in", this, SLOT(zoomIn()), QKeySequence(QKeySequence("Z")));
-    show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence(QKeySequence("Ctrl+Z")));
+//    QMenu *show = menuBar()->addMenu(tr("&View"));
+//    show->addAction("Zoom in", this, SLOT(zoomIn()), QKeySequence("Ctrl+Up"));
+//    show->addAction("Zoom out", this, SLOT(zoomOut()), QKeySequence("Ctrl+Z"));
     
     QMenu *tools = menuBar()->addMenu(tr("&Tools"));
-    tools->addAction("Trace channel", this, SLOT(tracePath()), QKeySequence(QKeySequence("T")));
+    tools->addAction("Trace channel", this, SLOT(tracePath()), QKeySequence("T"));
     
     // Diagrams view setup
     diagramScene = new QGraphicsScene;
@@ -431,6 +432,119 @@ void FMap::print()
     // undo printing setup
     foreach (Fdiagram *diagram, stack->getDiagrams()) {
         diagram->toView();
+    }
+}
+
+void FMap::importBackground()
+{
+    QFile file("/home/pak/tmp/map.osm.xml");
+    file.open(QIODevice::ReadOnly|QIODevice::Text);
+    QXmlStreamReader xml(&file);
+    QString id, lat, lon;
+    QVector<QString> ids;
+    qreal x, y;
+    QMap<QString, QPointF> nodes;
+    QMap<QString, QVector<QPointF> > ways;
+
+    while(!xml.atEnd() && !xml.hasError()){
+        QString errstr;
+        QXmlStreamReader::TokenType token;
+        token = xml.readNext();
+        errstr = xml.errorString();
+
+        /*If token is StartElement trying to read it*/
+        if(token == QXmlStreamReader::StartElement){
+            if (xml.name() == "node")
+            {
+                QXmlStreamAttributes attributes = xml.attributes();
+                if(attributes.hasAttribute("id"))
+                    id = attributes.value("id").toString();
+                if(attributes.hasAttribute("lat"))
+                    lat = attributes.value("lat").toString();
+                if(attributes.hasAttribute("lon"))
+                    lon = attributes.value("lon").toString();
+                // convert to cartesian projection
+                QProcess proc(this);
+                proc.start("/home/pak/bin/Proj " + lon + " " + lat);
+                proc.waitForFinished();
+                QByteArray result = proc.readAll();
+                QTextStream text(result);
+                text >> x >> y;
+                nodes.insert(id, QPointF(x * 5, y * -5));
+            }
+            if (xml.name() == "way")
+            {
+                QXmlStreamAttributes attributes = xml.attributes();
+                QString wid = attributes.value("id").toString();
+                token = xml.readNext();
+                QVector<QPointF> points;
+                QString number;
+                while (xml.name() != "way") {
+                    if (token == QXmlStreamReader::StartElement) {
+                        if (xml.name() == "nd") {
+                            QXmlStreamAttributes attributes = xml.attributes();
+                            id = attributes.value("ref").toString();
+                            points << nodes.value(id);
+                        }
+                        else if (xml.name() == "tag") {
+                            QXmlStreamAttributes attributes = xml.attributes();
+                            QString tag = attributes.value("k").toString();
+                            QString val = attributes.value("v").toString();
+                            if (tag == "addr:housenumber") {
+                                number = val;
+                            }
+                            else if (tag == "building") {
+                                QPainterPath path(points[0]);
+                                foreach (QPointF p, points) {
+                                    path.lineTo(p);
+                                }
+                                QPen pen("#666666");
+                                QBrush br("#bca9a9");
+                                scene->addPath(path, pen, br);
+                                QFont f("Verdana", 14);
+                                f.setBold(1);
+                                QGraphicsTextItem *txt = new QGraphicsTextItem(number);
+                                txt->setFont(f);
+                                txt->setPos(path.boundingRect().center() - txt->boundingRect().center());
+                                scene->addItem(txt);
+                            }
+                            else if (tag == "highway") {
+                                QPainterPath path(points[0]);
+                                foreach (QPointF p, points) {
+                                    path.lineTo(p);
+                                }
+                                qreal width = 1;
+                                if (val == "track")
+                                    width = 1.33;
+                                else if (val == "pedestrian")
+                                    width = 5.5;
+                                else if (val == "service")
+                                    width = 4.33;
+                                else if (val == "residential")
+                                    width = 12;
+                                else if (val == "unclassified")
+                                    width = 12;
+                                else if (val == "tertiary")
+                                    width = 11.33;
+                                else if (val == "secondary")
+                                    width = 11.33;
+                                else if (val == "primary")
+                                    width = 11.33;
+                                else if (val == "primary_link")
+                                    width = 11.33;
+                                else if (val == "access_destination" || val == "access_private")
+                                    width = 3.33;
+                                else
+                                    break;
+                                QPen pen(QBrush("#aaaaaa"), width * 4);
+                                scene->addPath(path, pen);
+                            }
+                        }
+                    }
+                    token = xml.readNext();
+                }
+            }
+        }
     }
 }
 

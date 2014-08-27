@@ -1,5 +1,5 @@
 include(../defaults.pri)
-QT      += svg
+QT      += svg xml
 TARGET = FMap
 TEMPLATE = lib
 
@@ -15,7 +15,8 @@ SOURCES += fmap.cpp \
     fscene.cpp \
     fdiagramstack.cpp \
     ftextitem.cpp \
-    flogicfiber.cpp
+    flogicfiber.cpp \
+    fview.cpp
 
 HEADERS  += fmap.h \
     fdiagram.h \
@@ -30,4 +31,5 @@ HEADERS  += fmap.h \
     fdiagramstack.h \
     ftextitem.h \
     flogicfiber.h \
-    fcolors.h
+    fcolors.h \
+    fview.h
